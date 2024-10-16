@@ -1,0 +1,357 @@
+/* Ensure full height and width of the container */
+
+.manage-profile-container {
+    display: flex;
+    width: 100vw; /* Full width of the viewport */
+    height: 100vh; /* Full height of the viewport */
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Sidebar Styling */
+.sidebar {
+    width: 250px;
+    background-color: #333;
+    color: white;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100vh;
+}
+
+.sidebar h2 {
+    color: #aa18ea;
+    margin-bottom: 40px;
+}
+
+.sidebar-links {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar-links li {
+    margin: 20px 0;
+}
+
+.sidebar-links a {
+    text-decoration: none;
+    color: white;
+    font-size: 18px;
+    transition: color 0.3s ease;
+}
+
+.sidebar-links a:hover {
+    color: #aa18ea;
+}
+
+/* Main Content Styling */
+.main-content {
+    flex-grow: 1; /* Take the remaining space next to the sidebar */
+    display: flex;
+    margin-left: 300px;
+    flex-direction: column;
+    padding: 20px;
+    background-color: white;
+}
+
+/* Header Styling */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.header h1 {
+    font-size: 2em;
+    color: #333;
+}
+
+/* Profile Form Styling */
+.profile-form-container {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    flex-grow: 1;
+    max-width: 500px;
+  
+}
+
+.profile-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    font-size: 1.2em;
+    color: #333;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1em;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus {
+    border-color: #aa18ea;
+}
+
+/* Button Styling */
+.custom-button {
+    background-color: #aa18ea;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+
+
+
+.custom-button:hover {
+    background-color: #900ec4;
+}
+.pollBtn{
+    background-color: #aa18ea;
+    color: white;
+    border-radius: 5px;
+    padding: 5px;
+
+    cursor: pointer;
+    width: 20%;
+    transition: background-color 0.3s ease;
+
+    
+}
+.pollBtn:hover{
+    background-color: #900ec4;
+}
+
+/* Success Message */
+.success-message {
+    margin-top: 20px;
+    color: green;
+    font-size: 1.1em;
+}
+
+/* Responsive Layout */
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 1.5em;
+    }
+
+    .custom-button {
+        font-size: 1em;
+        padding: 10px;
+    }
+
+    .profile-form-container {
+        padding: 20px;
+    }
+}
+/* Error Message */
+.error-message {
+    margin-top: 20px;
+    color: red;
+    font-size: 1.1em;
+  }
+  
+  /* Ensure password fields match the existing form fields */
+  .profile-form input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1em;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+  
+  .profile-form input[type="password"]:focus {
+    border-color: #aa18ea;
+  }
+  .password-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  .password-container input {
+    width: 100%;
+    padding-right: 40px; /* space for eye icon */
+  }
+  
+  .password-toggle-icon {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+  }
+  /* Filter button styling */
+.filter-button {
+    background-color: #aa18ea;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-bottom: 20px; /* Adds some space below the button */
+    border-radius: 4px;
+  }
+  
+  .filter-button:hover {
+    background-color: #900ec4;
+  }
+  
+  /* Poll Name Clickable */
+.poll-name {
+    cursor: pointer;
+    font-size: 18px;
+    padding: 10px;
+    background-color: white;
+    margin: 5px 0;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .poll-name:hover {
+    background-color: #b545e6;
+  }
+  
+  /* Poll Details */
+  .poll-details {
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    margin: 5px 0;
+  }
+  
+  /* Body transition for background color */
+  body {
+    transition: background-color 0.5s ease;
+  }
+  /* Additional styling for the view results button */
+.view-results-button {
+    margin-top: 10px;
+    background-color: #aa18ea;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2em;
+    width: 66vh;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .view-results-button:hover {
+    background-color:  #b545e6;
+  }
+  .chart-container {
+    max-width: 400px;
+    margin: 20px auto;
+  }
+  
+  /* Button Spacing */
+.form-button {
+    margin-top: 20px; /* Space between form elements */
+  }
+  
+  .custom-button + .custom-button {
+    margin-left: 10px; /* Space between buttons if side by side */
+  }
+  
+  /* Scrollable List Styling */
+  .scrollable-list {
+    max-height: 300px; /* Limit the height */
+    overflow-y: auto; /* Make it scrollable */
+    margin-top: 10px; /* Optional margin */
+  }
+  
+  /* Optional: Add styles to make the scroll experience more elegant */
+  .scrollable-list::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .scrollable-list::-webkit-scrollbar-thumb {
+    background-color: #aa18ea; /* Customize scrollbar thumb color */
+    border-radius: 4px;
+  }
+  .poll-list-container {
+  max-height: 500px; /* Limit the height of the container */
+  overflow-y: auto; /* Enable vertical scrolling */
+  padding-right: 10px; /* Add padding to prevent scroll bar from overlapping content */
+}
+
+
+/* Project Card Styling */
+.project-card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+/* Button Group to Align Buttons */
+.button-group {
+    display: flex;
+    gap: 10px; /* Space between buttons */
+    margin-top: 10px;
+}
+
+/* Edit Project Input */
+.edit-input {
+    padding: 10px;
+    width: 100%;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1em;
+}
+
+/* Success and Error Messages */
+.success-message,
+.error-message {
+    margin-top: 20px;
+    font-size: 1.1em;
+}
+
+.success-message {
+    color: green;
+}
+
+.error-message {
+    color: red;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .button-group {
+        flex-direction: column;
+        gap: 5px; /* Reduce space between buttons on smaller screens */
+    }
+
+    .edit-input {
+        margin-bottom: 15px; /* Add space between input and buttons */
+    }
+}

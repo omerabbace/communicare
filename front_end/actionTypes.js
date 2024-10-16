@@ -1,0 +1,2 @@
+export const ADD_DONATION = 'ADD_DONATION';
+export const RESET_DONATIONS = 'RESET_DONATIONS';

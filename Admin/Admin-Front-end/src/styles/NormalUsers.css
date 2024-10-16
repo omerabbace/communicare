@@ -1,0 +1,70 @@
+/* src/styles/NormalUsers.css */
+html, body {
+    overflow-x: hidden; /* Disable horizontal scrolling */
+    margin: 0;
+    padding: 0;
+    width: 100%; /* Ensure no horizontal overflow */
+  }
+  
+.normal-users-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    overflow-x: hidden; 
+    
+  }
+  
+  .content {
+    margin-left: 310px; /* Adjust based on your sidebar width */
+    padding: 20px;
+    width: 100%;
+    background-color: #f4f4f4; /* Optional: background for content area */
+    min-height: 100vh; /* Ensures content area covers full height */
+  }
+  
+  .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .header-container h2 {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
+  }
+  
+  .add-user-btn {
+    background-color: #000000; /* Black button color */
+    color: #ffffff;
+    padding: 10px 20px;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-right: 30px;
+    /* position :fixed; */
+  }
+  
+  .add-user-btn:hover {
+    background-color: #333333; /* Slightly lighter on hover */
+  }
+  
+  /* Additional Styling for Search and Filter (if required) */
+  .search-container {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .search-input {
+    padding: 8px;
+    width: 100%;
+    max-width: 300px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+  }

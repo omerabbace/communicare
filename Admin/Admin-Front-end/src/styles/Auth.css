@@ -1,0 +1,127 @@
+/* General Page Styling */
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f0f0;
+}
+
+/* Container for split layout */
+.container {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Left side - Image Section */
+.left-section {
+    width: 50%;
+    background-image: url('../styles/img/home.jpg'); 
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: flex-end;
+    padding: 20px;
+}
+
+.left-section .image-caption {
+    font-size: 14px;
+    color: white;
+    font-weight: bold;
+}
+
+/* Right side - Form Section */
+.right-section {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff;
+    padding: 40px;
+}
+
+.login-box {
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    padding: 40px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Styles */
+h2 {
+    font-size: 26px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.input-container {
+    margin-bottom: 20px;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+    outline: none;
+}
+
+input:focus {
+    border-color: #aa18ea; /* Focus border color */
+}
+
+.login-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #aa18ea; /* Button color */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.login-button:hover {
+    background-color: #900ec4; /* Darker shade on hover */
+}
+
+/* Error Message Styling */
+.error {
+    color: red;
+    margin-bottom: 20px;
+}
+
+.success {
+    color: green;
+    margin-bottom: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .left-section, .right-section {
+        width: 100%;
+    }
+
+    .left-section {
+        height: 40%;
+    }
+
+    .right-section {
+        height: 60%;
+    }
+}

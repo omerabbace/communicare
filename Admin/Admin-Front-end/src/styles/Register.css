@@ -1,0 +1,73 @@
+/* Container styling */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f5f5f5;
+  }
+  
+  /* Profile box */
+  .profile-box {
+    background-color: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 500px;
+    text-align: left;
+  }
+  
+  /* Input container */
+  .input-container {
+    margin-bottom: 20px;
+  }
+  
+  .input-container label {
+    display: block;
+    font-size: 1.2em;
+    margin-bottom: 5px;
+    color: #333;
+  }
+  
+  .input-container input {
+    width: 100%;
+    padding: 10px;
+    font-size: 1em;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  
+  .input-container input:focus {
+    border-color: #aa18ea;
+  }
+  
+  /* Error and success messages */
+  .error {
+    color: red;
+    margin-top: 10px;
+  }
+  
+  .success {
+    color: green;
+    margin-top: 10px;
+  }
+  
+  /* Button styling */
+  .profile-button {
+    background-color: #aa18ea;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .profile-button:hover {
+    background-color: #900ec4;
+  }
+  

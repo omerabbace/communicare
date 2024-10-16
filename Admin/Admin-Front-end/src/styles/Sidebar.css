@@ -1,0 +1,80 @@
+
+/* Sidebar Styling */
+.sidebar {
+    width: 240px;
+    background-color: #1e1e2f; /* Dark background */
+    color: #ffffff;
+    height: 100vh;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    position: fixed;
+    overflow-y: auto;
+    
+  }
+  
+  .sidebar h2 {
+    font-size: 22px;
+    margin-bottom: 20px;
+    color: #aa18ea; /* Branding color */
+  }
+  
+  .sidebar-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    flex-grow: 1; 
+  }
+  
+  .sidebar-links li {
+    margin: 15px 0;
+  }
+  
+  .sidebar-links a {
+    text-decoration: none;
+    color: #ffffff;
+    font-size: 16px;
+    padding: 10px 15px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease;
+  }
+  
+  .sidebar-links a:hover {
+    background-color: #c6c9c4; /* Highlighted green on hover */
+    color: #111;
+  }
+  
+  .icon {
+    margin-right: 10px; /* Space between icon and text */
+  }
+  
+  /* Submenu Styling */
+  .submenu {
+    list-style: none;
+    padding-left: 20px; /* Indentation for submenu */
+    margin: 10px 0;
+  }
+  
+  .submenu-icon {
+    margin-right: 8px;
+  }
+  
+  .submenu a {
+    color: #ffffff;
+    font-size: 14px;
+  }
+  
+  .submenu a:hover {
+    color: #8bea47;
+  }
+  
+  /* Active Link Styling */
+  .sidebar-links li.active > a {
+    background-color: #8bea47; /* Active item highlighted */
+    color: #111;
+  }
+  
