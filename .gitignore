@@ -28,3 +28,6 @@ node_modules/
 # Ignore Expo
 .expo/
 .expo-shared/
+
+# Ignore uploads
+uploads/
