@@ -20,6 +20,7 @@ import axios from 'axios';
 import { Video } from 'expo-av'; // Ensure Video is imported
 import { BASE_URL } from '../../config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const IssueReport = ({ issueCategories }) => {
   const [selectedIssue, setSelectedIssue] = useState('');
   const [details, setDetails] = useState('');
@@ -112,36 +113,52 @@ const IssueReport = ({ issueCategories }) => {
       setMedia([...media, { uri: selectedAsset.uri, type: selectedAsset.type }]); // Store uri and type
     }
   };
-  
+
+  const removeMedia = (index) => {
+    setMedia(media.filter((_, i) => i !== index));
+  };
 
   const submitReport = async () => {
     if (media.length === 0) {
       Alert.alert('Error', 'No media selected');
       return;
     }
-
+  
     try {
       const token = await AsyncStorage.getItem('token');
       const userSession = await AsyncStorage.getItem('userSession');
       const user = JSON.parse(userSession);
       setLoading(true);
-      const reportData = {
-        reportedBy: user._id,
-        issueType: selectedIssue,
-        description: details,
-        location,
-        media,
-      };
-      console.log(reportData);
-
-
-      await axios.post(`${BASE_URL}/api/issueReporting/report`, reportData,
-        {
-          headers: {
-            Authorization : `Bearer ${token}`,
-
-        }}
-      );
+  
+      const formData = new FormData();
+  
+      // Add issue details
+      formData.append('reportedBy', user._id);
+      formData.append('issueType', selectedIssue);
+      formData.append('description', details);
+  
+      // Add location
+      formData.append('latitude', location.latitude);
+      formData.append('longitude', location.longitude);
+  
+      // Add media files to formData
+      media.forEach((item, index) => {
+        const fileType = item.type === 'video' ? 'video/mp4' : 'image/jpeg';
+        const fileName = `media_${index}.${item.type === 'video' ? 'mp4' : 'jpg'}`;
+        formData.append('media', {
+          uri: item.uri,
+          type: fileType,
+          name: fileName,
+        });
+      });
+  
+      // Send the request
+      await axios.post(`${BASE_URL}/api/issueReporting/report`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
       Alert.alert('Report Submitted', 'Your issue report has been submitted successfully.');
       setSelectedIssue('');
       setDetails('');
@@ -154,7 +171,7 @@ const IssueReport = ({ issueCategories }) => {
       setLoading(false);
     }
   };
-
+  
   const cancelReport = () => {
     setSelectedIssue('');
     setDetails('');
@@ -222,32 +239,28 @@ const IssueReport = ({ issueCategories }) => {
         </TouchableOpacity>
 
         <ScrollView horizontal contentContainerStyle={styles.imageContainer}>
-  {media.length > 0 ? (
-    media.map((item, index) => {
-      if (item && item.uri) {
-        if (item.type === 'video') {
-          return (
-            <Video
-              key={index}
-              source={{ uri: item.uri }}
-              style={styles.media}
-              resizeMode="cover"
-              useNativeControls
-            />
-          );
-        } else {
-          return <Image key={index} source={{ uri: item.uri }} style={styles.media} />;
-        }
-      } else {
-        return <Text key={index}>Invalid media selected</Text>;
-      }
-    })
-  ) : (
-    <Text>No media selected</Text>
-  )}
-</ScrollView>
-
-
+          {media.length > 0 ? (
+            media.map((item, index) => (
+              <View key={index} style={styles.mediaItem}>
+                {item.type === 'video' ? (
+                  <Video
+                    source={{ uri: item.uri }}
+                    style={styles.media}
+                    resizeMode="cover"
+                    useNativeControls
+                  />
+                ) : (
+                  <Image source={{ uri: item.uri }} style={styles.media} />
+                )}
+                <TouchableOpacity onPress={() => removeMedia(index)} style={styles.removeButton}>
+                  <Text style={styles.removeButtonText}>Remove</Text>
+                </TouchableOpacity>
+              </View>
+            ))
+          ) : (
+            <Text>No media selected</Text>
+          )}
+        </ScrollView>
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity onPress={submitReport} style={styles.submitButton}>
@@ -363,11 +376,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: 20,
   },
+  mediaItem: {
+    position: 'relative',
+  },
   media: {
     width: 120,
     height: 120,
     borderRadius: 10,
     marginRight: 10,
+  },
+  removeButton: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: 5,
+    borderRadius: 5,
+  },
+  removeButtonText: {
+    color: '#fff',
+    fontSize: 12,
   },
   buttonContainer: {
     flexDirection: 'row',

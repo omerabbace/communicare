@@ -3,32 +3,50 @@ const AppError = require('../utilities/AppError');
 const Issue = require('../model/IssueReporting');
 const User = require('../model/User');
 const { notifyAllVolunteers } = require('../services/notificationService');
+const upload = require('../middlewares/upload');
 
 // Controller to create an issue (reported by a normal user)
-exports.createIssue = asyncHandler(async (req, res, next) => {
-    const { issueType, description, media, location } = req.body;
-
-    // Validate if all required fields are provided
-    if (!issueType || !description || !location || !location.latitude || !location.longitude ) {
-        return next(new AppError('Please provide all required fields (issueType, description, location).', 400));
+exports.createIssue = asyncHandler(async (req, res) => {
+  console.log(req.body);
+  upload(req, res, async (err) => {
+    if (err) {
+      console.log('Error during file upload:', err);
+      return res.status(500).json({ message: 'Multer error', error: err.message });
     }
 
-    // Create a new issue in the database
-    const issue = new Issue({
-        reportedBy: req.user._id, // Assuming req.user contains the logged-in user's ID
+    console.log('Uploaded files:', req.files);  // Debug to check if files are processed
+
+    const { issueType, description, latitude, longitude } = req.body;
+
+    if (!issueType || !description || !latitude || !longitude) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    try {
+      const media = req.files.map((file) => ({
+        name: file.originalname,
+        type: file.mimetype.includes('video') ? 'video' : 'image',
+        uri: file.path,
+      }));
+
+      console.log('Processed media:', media);  // Debug to ensure media is processed
+
+      const issue = new Issue({
+        reportedBy: req.user._id,
         issueType,
         description,
         media,
-        location
-    });
+        location: { latitude, longitude },
+      });
 
-    await issue.save();
+      await issue.save();
 
-    res.status(201).json({
-        success: true,
-        message: 'Issue reported successfully',
-        issue
-    });
+      res.status(201).json({ success: true, issue });
+    } catch (error) {
+      console.error('Error saving issue:', error);  // Debug database errors
+      res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+  });
 });
 
 
@@ -376,3 +394,163 @@ exports.getUserReportedIssues = asyncHandler(async (req, res, next) => {
     issues,
   });
 });
+
+
+
+
+
+// Controller to reject an issue
+// exports.rejectIssue = async (req, res) => {
+//   try {
+//       const { issueId } = req.params; // Get the issue ID from the request params
+//       const { userId, reason } = req.body; // Assuming the userId of the admin/leader and reason for rejection
+
+//       // Find the issue by ID and update the status to 'rejected'
+//       const issue = await ReportedIssue.findByIdAndUpdate(
+//           issueId,
+//           { status: 'rejected' },
+//           { new: true }
+//       );
+
+//       if (!issue) {
+//           return res.status(404).json({ message: 'Issue not found' });
+//       }
+
+//       // Optionally, log the rejection reason or save it somewhere
+//       // For example, you can add a "rejectionReason" field to the schema if needed
+//       if (reason) {
+//           // You can update this issue with the rejection reason if necessary
+//           issue.rejectionReason = reason; // Optional: Add this field to the schema if desired
+//           await issue.save();
+//       }
+
+//       res.status(200).json({ message: 'Issue rejected successfully', issue });
+//   } catch (error) {
+//       console.error(error);
+//       res.status(500).json({ message: 'Server error, unable to reject issue' });
+//   }
+// };
+
+// Controller for assigning a sub-task to a volunteer
+// exports.assignSubTask = async (req, res) => {
+//   try {
+//       const { issueId } = req.params; // The issue ID
+//       const { assignedTo, description, media } = req.body; // Sub-task details
+
+//       // Find the issue and check if the requestor is the team leader
+//       const issue = await ReportedIssue.findById(issueId);
+
+//       if (!issue) {
+//           return res.status(404).json({ message: 'Issue not found' });
+//       }
+
+//       if (String(issue.leader) !== req.user.id) { // Assuming req.user.id is the logged-in user's ID
+//           return res.status(403).json({ message: 'Only the team leader can assign sub-tasks' });
+//       }
+
+//       // Create the sub-task
+//       const subTask = {
+//           assignedTo,
+//           description,
+//           media: media || [], // Media array (optional)
+//           status: 'pending'
+//       };
+
+//       // Add the sub-task to the issue
+//       issue.subTasks.push(subTask);
+//       await issue.save();
+
+//       res.status(200).json({ message: 'Sub-task assigned successfully', issue });
+//   } catch (error) {
+//       console.error(error);
+//       res.status(500).json({ message: 'Server error, unable to assign sub-task' });
+//   }
+// };
+
+// // Controller for updating a sub-task
+// exports.updateSubTask = async (req, res) => {
+//   try {
+//       const { issueId, subTaskId } = req.params; // Issue and sub-task IDs
+//       const { description, media } = req.body; // Update details
+
+//       // Find the issue
+//       const issue = await ReportedIssue.findById(issueId);
+
+//       if (!issue) {
+//           return res.status(404).json({ message: 'Issue not found' });
+//       }
+
+//       // Find the sub-task
+//       const subTask = issue.subTasks.id(subTaskId);
+
+//       if (!subTask) {
+//           return res.status(404).json({ message: 'Sub-task not found' });
+//       }
+
+//       // Check if the volunteer is allowed to update this sub-task
+//       if (String(subTask.assignedTo) !== req.user.id) {
+//           return res.status(403).json({ message: 'You are not assigned to this sub-task' });
+//       }
+
+//       // Add the update to the sub-task
+//       const update = {
+//           updatedBy: req.user.id, // The volunteer's ID
+//           description,
+//           media: media || [], // Media array (optional)
+//           date: Date.now()
+//       };
+
+//       subTask.updates.push(update);
+//       await issue.save();
+
+//       res.status(200).json({ message: 'Sub-task updated successfully', issue });
+//   } catch (error) {
+//       console.error(error);
+//       res.status(500).json({ message: 'Server error, unable to update sub-task' });
+//   }
+// };
+
+// // Controller for providing progress on a sub-task
+// exports.updateSubTaskProgress = async (req, res) => {
+//   try {
+//       const { issueId, subTaskId } = req.params; // Issue and sub-task IDs
+//       const { description, media } = req.body; // Progress update details
+
+//       // Find the issue
+//       const issue = await ReportedIssue.findById(issueId);
+
+//       if (!issue) {
+//           return res.status(404).json({ message: 'Issue not found' });
+//       }
+
+//       // Find the sub-task
+//       const subTask = issue.subTasks.id(subTaskId);
+
+//       if (!subTask) {
+//           return res.status(404).json({ message: 'Sub-task not found' });
+//       }
+
+//       // Check if the volunteer is allowed to update this sub-task
+//       if (String(subTask.assignedTo) !== req.user.id) {
+//           return res.status(403).json({ message: 'You are not assigned to this sub-task' });
+//       }
+
+//       // Add the progress update to the sub-task
+//       const progressUpdate = {
+//           updatedBy: req.user.id, // The volunteer's ID
+//           description,
+//           media: media || [], // Media array (optional)
+//           date: Date.now()
+//       };
+
+//       subTask.progressUpdates.push(progressUpdate);
+//       subTask.status = 'in progress'; // Optionally update the sub-task status to 'in progress'
+
+//       await issue.save();
+
+//       res.status(200).json({ message: 'Sub-task progress updated successfully', issue });
+//   } catch (error) {
+//       console.error(error);
+//       res.status(500).json({ message: 'Server error, unable to update sub-task progress' });
+//   }
+// };

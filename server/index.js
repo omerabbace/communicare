@@ -15,6 +15,8 @@ const donationRoutes = require('./routes/donationRoutes');
 const servicePaymentRoutes = require('./routes/servicePaymentRoutes');
 const charityProjectRoutes = require('./routes/charityProjectRoutes');
 const issueReportingRoutes = require('./routes/issueReportingRoutes');
+const path = require('path');
+
 const dotenv = require('dotenv')
 dotenv.config(); // Load environment variables from .env file
 
@@ -22,6 +24,7 @@ dotenv.config(); // Load environment variables from .env file
 const PORT = process.env.PORT || 45200;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/fyp_database';
 const ipAddress = '0.0.0.0';
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // CORS JSON and URL encoded middlewares enabled
 app.use(cors());
