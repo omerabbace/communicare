@@ -69,11 +69,6 @@
 
     // Route for the leader to leave the task after reassigning leadership
     router.put('/leader-leave-task', isLogin, isVolunteer, issueController.leaderLeaveTask);
-
-
-
-
-
     // Route for volunteers to get their assigned issues
     router.get('/volunteer/issues', isLogin, isVolunteer, issueController.getAssignedIssues);
 

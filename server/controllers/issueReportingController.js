@@ -498,6 +498,7 @@ exports.getAssignedIssues = asyncHandler(async (req, res, next) => {
 exports.getIssueById = asyncHandler(async (req, res, next) => {
   const { issueId } = req.params;
 
+  // Find the issue and populate the relevant fields
   const issue = await Issue.findById(issueId)
     .populate('reportedBy', 'name email')
     .populate('assignedVolunteers', 'name email')
@@ -507,11 +508,21 @@ exports.getIssueById = asyncHandler(async (req, res, next) => {
     return next(new AppError('Issue not found.', 404));
   }
 
+  // Filter out the leader from the assigned volunteers
+  const filteredVolunteers = issue.assignedVolunteers.filter(
+    (volunteer) => !volunteer._id.equals(issue.leader._id)
+  );
+
+  // Return the issue with the filtered list of volunteers
   res.status(200).json({
     success: true,
-    issue,
+    issue: {
+      ...issue.toObject(),
+      assignedVolunteers: filteredVolunteers,
+    },
   });
 });
+
 // Controller to report task status to the normal user
 exports.getTaskStatus = asyncHandler(async (req, res, next) => {
   const { issueId } = req.params;
