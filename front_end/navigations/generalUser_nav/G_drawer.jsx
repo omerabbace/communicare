@@ -20,7 +20,7 @@ import ForumDiscussion from "../../components/ForumDiscussion";
 import ReportAccident from "../../components/ReportAccident";
 import VehicleAssistance from "../../components/VehicleAssistance";
 import TrackServiceProvider from "../../components/TrackServiceProvider";
-
+import UserReportedIssuesScreen from "../../screens/generalUser/ReportedIssues";
 const Drawer = createDrawerNavigator();
 function GeneralDrawer({ navigation }) {
   const { userSession } = useContext(AuthContext);
@@ -82,6 +82,15 @@ function GeneralDrawer({ navigation }) {
       >
         {(props) => <IssueReport {...props} issueCategories={issueCategories} />}
       </Drawer.Screen>
+      <Drawer.Screen
+        name="Track Report"
+        component={UserReportedIssuesScreen}
+        options={{
+          drawerIcon: ({ color }) => (
+            <MaterialIcons name="arrow-forward" size={22} color={color} />
+          ),
+        }}
+      />
       <Drawer.Screen
         name="Donate"
         component={DonationScreen}

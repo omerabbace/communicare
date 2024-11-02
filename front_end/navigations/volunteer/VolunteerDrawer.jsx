@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import VolunteerHome from "../../screens/volunteer/LandingVolunteer";
 import Profile from "../../screens/generalUser/Profile";
@@ -10,13 +10,22 @@ import ForumDiscussion from "../../components/ForumDiscussion";
 import PollList from "../../components/PollList";
 import PollDetail from "../../components/PollDetail";
 import CustomServiceProviderDrawer from "../../components/CustomServiceProDrawer";
-
+import IssueListScreen from "../../screens/volunteer/ApprovedIssuesList";
+import VolunteerManagementScreen from "../../screens/volunteer/VolunteerManagementScreen";
+import LeaderTaskScreen from "../../screens/volunteer/LeaderTask";
+import AssignSubTaskScreen from "../../screens/volunteer/AssignSubTaskScreen";
+import ViewAssignedSubTasksScreen from "../../screens/volunteer/ViewAssignedSubTasksScreen";
+import VolunteerSubTasksScreen from "../../screens/volunteer/VolunteerSubTasksScreen";
+import ReportTaskScreen from "../../screens/volunteer/ReportTaskScreen";
+import CompletedLeaderTasksScreen from "../../screens/volunteer/CompletedLeaderTasksScreen";
 const Drawer = createDrawerNavigator();
 
 function VolunteerDrawer({ navigation }) {
-  const { userSession } = useContext(AuthContext);
+  const { userSession , isLeader} = useContext(AuthContext);
   const [fullName, setFullName] = useState(userSession.name);
   const [profilePhoto, setProfilePhoto] = useState(userSession.profilePhoto);
+
+
 
   return (
     <Drawer.Navigator
@@ -76,6 +85,91 @@ function VolunteerDrawer({ navigation }) {
             ),
           }}
         /> */}
+        <Drawer.Screen
+        name="Issues List"
+        component={IssueListScreen}
+        options={{
+          drawerIcon: ({ color }) => (
+            <MaterialIcons name="report" size={22} color={color} />
+          ),
+        }}
+      />
+        {/* <Drawer.Screen
+        name="Manage Volunteers"
+        component={VolunteerManagementScreen}
+        options={{
+          drawerIcon: ({ color }) => (
+            <MaterialIcons name="report" size={22} color={color} />
+          ),
+        }}
+      /> */}
+      <Drawer.Screen
+        name="Manage Volunteers"
+        options={{
+          drawerIcon: ({ color }) => (
+            <MaterialIcons name="report" size={22} color={color} />
+          ),
+        }}
+      >
+      {(props) =>(
+        <VolunteerManagementScreen
+        {...props}
+         isLeader= {isLeader} 
+        />
+      )}
+      </Drawer.Screen>
+      {isLeader && (
+      <Drawer.Screen
+        name="pending Leader Tasks"
+        component={LeaderTaskScreen}
+        options={{
+          drawerIcon: ({ color }) => (
+            <MaterialIcons name="report" size={22} color={color} />
+          ),
+        }}
+      />
+      )}
+      {isLeader && (
+      <Drawer.Screen
+        name="Completed Leader Tasks"
+        component={CompletedLeaderTasksScreen}
+        options={{
+          drawerIcon: ({ color }) => (
+            <MaterialIcons name="report" size={22} color={color} />
+          ),
+        }}
+      />
+      )}
+       <Drawer.Screen
+        name="assignSubtask"
+        component={AssignSubTaskScreen}
+        options={{
+          drawerItemStyle : {display : 'none'},
+        }}
+      />
+      <Drawer.Screen
+        name="ViewAssignedSubTasksScreen"
+        component={ViewAssignedSubTasksScreen}
+        options={{
+          drawerItemStyle : {display : 'none'},
+        }}
+      />
+      <Drawer.Screen
+        name="VolunteerSubTasksScreen"
+        component={VolunteerSubTasksScreen}
+        options={{
+          drawerItemStyle : {display : 'none'},
+        }}
+      />
+      <Drawer.Screen
+        name="ReportTaskScreen"
+        component={ReportTaskScreen}
+        options={{
+          drawerItemStyle : {display : 'none'},
+        }}
+      />
+    
+
         <Drawer.Screen
         name="Discussion Forums"
         component={Forum}

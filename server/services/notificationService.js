@@ -1,41 +1,35 @@
-const { Expo } = require('expo-server-sdk');
+const admin = require('../firebase'); // Import Firebase Admin instance
 const User = require('../model/User');
 
-// Create a new Expo SDK client
-let expo = new Expo();
-
-// Function to notify all volunteers using Expo Push Notifications
+// Function to notify all volunteers using Firebase Cloud Messaging (FCM)
 const notifyAllVolunteers = async (issueId) => {
   try {
     // Fetch all volunteers from the database
     const volunteers = await User.find({ role: 'volunteer' });
 
-    // Create an array of messages to send to users
-    const messages = volunteers
-      .filter((volunteer) => Expo.isExpoPushToken(volunteer.expoPushToken)) // Ensure they have a valid Expo push token
-      .map((volunteer) => ({
-        to: volunteer.expoPushToken,
-        sound: 'default',
-        title: 'New Volunteer Request',
-        body: 'A new issue requires volunteers. Tap to join!',
-        data: { issueId: issueId.toString() },
-      }));
+    // Get FCM tokens from volunteers and filter out empty tokens
+    const tokens = volunteers
+      .map(volunteer => volunteer.fcmToken) // Assume the FCM token is stored as fcmToken
+      .filter(Boolean); // Filter out undefined or null tokens
 
-    if (messages.length === 0) {
-      console.log('No volunteers with valid Expo push tokens found.');
+    if (tokens.length === 0) {
+      console.log('No volunteers with valid FCM tokens found.');
       return;
     }
 
-    // Send notifications in chunks (Expo allows 100 notifications per chunk)
-    const chunks = expo.chunkPushNotifications(messages);
-    for (let chunk of chunks) {
-      try {
-        const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
-        console.log('Expo push notification sent:', ticketChunk);
-      } catch (error) {
-        console.error('Error sending Expo push notifications:', error);
-      }
-    }
+    // Create the payload for the push notifications
+    const payload = {
+      notification: {
+        title: 'New Volunteer Request',
+        body: 'A new issue requires volunteers. Tap to join!',
+      },
+      data: { issueId: issueId.toString() }, // Custom data
+    };
+
+    // Send notifications via FCM
+    const response = await admin.messaging().sendToDevice(tokens, payload);
+    console.log('FCM notifications sent:', response);
+
   } catch (error) {
     console.error('Error in notifying volunteers:', error);
   }

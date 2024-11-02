@@ -13,6 +13,7 @@ import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import RNPickerSelect from 'react-native-picker-select';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BASE_URL } from '../config';
 import { AuthContext } from '../helpers/Auth';
 import { db } from '../firebaseConfig';
@@ -25,64 +26,93 @@ const ReportAccident = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [mapModalVisible, setMapModalVisible] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
-  const [autoSelectCurrentLocation, setAutoSelectCurrentLocation] = useState(false);
   const [accidentId, setAccidentId] = useState(null);
-  const [serviceProviderAccepted, setServiceProviderAccepted] = useState(false);
+  const [serviceProviderDetails, setServiceProviderDetails] = useState(null);
+  const [autoSelectCurrentLocation, setAutoSelectCurrentLocation] = useState(false); // State for auto-location selection
 
   const { userSession } = useContext(AuthContext);
 
   useEffect(() => {
-    console.log('Component mounted or accidentId changed:', accidentId);
-    console.log('User session:', userSession);
+    const fetchStoredAccidentId = async () => {
+      try {
+        const storedAccidentId = await AsyncStorage.getItem('accidentId');
+        if (storedAccidentId) {
+          setAccidentId(storedAccidentId);
+          fetchAccidentDetails(storedAccidentId);
+        }
+      } catch (error) {
+        console.error('Error fetching stored accident ID:', error);
+      }
+    };
 
-    if (autoSelectCurrentLocation) {
-      getLocationAsync();
-    }
+    fetchStoredAccidentId();
+  }, []);
 
+  useEffect(() => {
     if (accidentId) {
-      console.log('Setting up Firebase listener for accidentId:', accidentId);
       const accidentRef = ref(db, `accidents/${accidentId}`);
-      
       onValue(accidentRef, (snapshot) => {
         const accidentData = snapshot.val();
-        console.log('Firebase accident data:', accidentData);
         if (accidentData && accidentData.selectedBy) {
-          setServiceProviderAccepted(true);
-          console.log('Service provider accepted the accident.');
-        } else {
-          console.log('Service provider has not accepted the accident yet.');
+          setServiceProviderDetails({
+            name: accidentData.serviceProviderName,
+            phoneNumber: accidentData.serviceProviderPhone
+          });
         }
       });
 
       return () => {
-        console.log('Cleaning up Firebase listener');
         off(accidentRef, 'value');
       };
     }
-  }, [autoSelectCurrentLocation, accidentId, userSession]);
+  }, [accidentId]);
 
-  const getLocationAsync = async () => {
-    setLoading(true);
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Location Permission Denied', 'Permission to access location was denied.');
-      setLoading(false);
-      return;
+  const fetchAccidentDetails = async (id) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/api/accidents/${id}`, {
+        headers: {
+          Authorization: `Bearer ${userSession.token}`
+        }
+      });
+      if (response.data.success) {
+        setServiceProviderDetails(response.data.data.selectedBy ? {
+          name: response.data.data.serviceProviderName,
+          phoneNumber: response.data.data.serviceProviderPhone
+        } : null);
+      }
+    } catch (error) {
+      console.error('Error fetching accident details:', error);
     }
-
-    let location = await Location.getCurrentPositionAsync({});
-    setLocation(location);
-    setSelectedLocation({
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude
-    });
-    setLoading(false);
   };
 
-  const handleSelectLocation = (event) => {
-    const { latitude, longitude } = event.nativeEvent.coordinate;
-    setSelectedLocation({ latitude, longitude });
-    setMapModalVisible(false);
+  const getLocationAsync = async () => {
+    try {
+      setLoading(true);
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Location Permission Denied', 'Permission to access location was denied.');
+        setLoading(false);
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+
+      setLocation(location);
+      setSelectedLocation({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+
+      console.log('Current Location:', location); // Debug log
+
+    } catch (error) {
+      console.error('Error fetching current location:', error);
+      Alert.alert('Error', 'Failed to get current location. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -110,12 +140,14 @@ const ReportAccident = ({ navigation }) => {
         }
       });
       if (response.data.success) {
-        setAccidentId(response.data.data._id); // Set accidentId for further tracking
+        const newAccidentId = response.data.data._id;
+        setAccidentId(newAccidentId);
+        await AsyncStorage.setItem('accidentId', newAccidentId);
         Alert.alert('Success', 'Accident report submitted successfully.');
 
-        const accidentRef = ref(db, `accidents/${response.data.data._id}`);
+        const accidentRef = ref(db, `accidents/${newAccidentId}`);
         await set(accidentRef, {
-          accidentId: response.data.data._id,
+          accidentId: newAccidentId,
           phoneNumber,
           accidentSeverity,
           location: {
@@ -123,31 +155,24 @@ const ReportAccident = ({ navigation }) => {
             longitude: selectedLocation.longitude.toString()
           },
           user: userSession._id,
-          selectedBy: null  // This will be updated by the service provider later
+          selectedBy: null
         });
       } else {
         Alert.alert('Error', response.data.message || 'Failed to submit the accident report.');
       }
-    } catch (firebaseError) {
-      console.error('Firebase Error:', firebaseError.code, firebaseError.message, firebaseError);
-      Alert.alert('Error', `Failed to store accident report in Firebase: ${firebaseError.message}`);
+    } catch (error) {
+      console.error('Error submitting accident report:', error);
+      Alert.alert('Error', 'Failed to store accident report in Firebase.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleUseCurrentLocation = () => {
-    setAutoSelectCurrentLocation(true);
-    setMapModalVisible(true);
-  };
-
-  const handleSelectManually = () => {
-    setAutoSelectCurrentLocation(false);
-    setMapModalVisible(true);
-  };
-
   const handleTrackServiceProvider = () => {
-    navigation.navigate('TrackServiceProvider', { accidentId });
+    navigation.navigate('TrackServiceProvider', {
+      accidentId,
+      serviceProviderDetails
+    });
   };
 
   return (
@@ -177,13 +202,20 @@ const ReportAccident = ({ navigation }) => {
       <View style={styles.locationOptions}>
         <TouchableOpacity
           style={[styles.locationButton, autoSelectCurrentLocation && styles.activeLocationButton]}
-          onPress={handleUseCurrentLocation}
+          onPress={() => {
+            setAutoSelectCurrentLocation(true);
+            getLocationAsync();
+            setMapModalVisible(true);
+          }}
         >
           <Text style={styles.locationButtonText}>Use My Current Location</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.locationButton, !autoSelectCurrentLocation && styles.activeLocationButton]}
-          onPress={handleSelectManually}
+          onPress={() => {
+            setAutoSelectCurrentLocation(false);
+            setMapModalVisible(true);
+          }}
         >
           <Text style={styles.locationButtonText}>Select Manually</Text>
         </TouchableOpacity>
@@ -199,18 +231,24 @@ const ReportAccident = ({ navigation }) => {
               latitudeDelta: 0.0922,
               longitudeDelta: 0.0421,
             }}
-            region={selectedLocation ? {
-              latitude: selectedLocation.latitude,
-              longitude: selectedLocation.longitude,
-              latitudeDelta: 0.0922,
-              longitudeDelta: 0.0421,
-            } : null}
-            onPress={handleSelectLocation}
+            region={
+              selectedLocation && {
+                latitude: selectedLocation.latitude,
+                longitude: selectedLocation.longitude,
+                latitudeDelta: 0.0922,
+                longitudeDelta: 0.0421,
+              }
+            }
+            onPress={(event) => {
+              const { latitude, longitude } = event.nativeEvent.coordinate;
+              setSelectedLocation({ latitude, longitude });
+              setMapModalVisible(false);
+            }}
           >
             {selectedLocation && (
               <Marker
                 coordinate={selectedLocation}
-                title="Selected Location"
+                title="Your Location"
               />
             )}
           </MapView>
@@ -229,7 +267,7 @@ const ReportAccident = ({ navigation }) => {
         <Text style={styles.submitButtonText}>Submit Report</Text>
       </TouchableOpacity>
 
-      {serviceProviderAccepted && (
+      {serviceProviderDetails && (
         <TouchableOpacity style={styles.trackButton} onPress={handleTrackServiceProvider}>
           <Text style={styles.trackButtonText}>Track Service Provider</Text>
         </TouchableOpacity>

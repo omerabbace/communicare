@@ -2,7 +2,7 @@
 
 const express = require('express');
 const { validateRegister, validateLogin } = require('../middlewares/schemaValidator');
-const { registerUser, registerUsersByAdmin,loginUser, changePassword, updateProfile, getProfile,disableUser,enableUser, approveUser, rejectUser,updateExpoPushToken} = require('../controllers/users');
+const { registerUser, registerUsersByAdmin,loginUser, changePassword, updateProfile, getProfile,disableUser,enableUser, approveUser, rejectUser,saveFcmToken} = require('../controllers/users');
 const { isLogin } = require('../middlewares/isLogin');
 const { isProfileAuthor } = require('../middlewares/authorization');
 const router = express.Router();
@@ -31,5 +31,5 @@ router.patch('/enable/:userId', isLogin, enableUser);
 router.patch('/approve/:userId', isLogin, approveUser); // Approve user
 router.patch('/reject/:userId', isLogin, rejectUser);   // Reject user
 // Route to update Expo push token
-router.put('/update-expo-push-token', isLogin, updateExpoPushToken);
+router.put('/update-fcm-token', isLogin, saveFcmToken);
 module.exports = router;

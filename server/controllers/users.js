@@ -435,32 +435,31 @@ const rejectUser = asyncHandler(async (req, res) => {
         }
     });
 });
-// Controller to update Expo push token for the logged-in user
-const updateExpoPushToken = asyncHandler(async (req, res, next) => {
-    const { expoPushToken } = req.body;
+// Route to save the FCM token for a user
+const saveFcmToken = asyncHandler(async (req, res, next) => {
+    const { userId, fcmToken } = req.body;
   
-    if (!expoPushToken) {
-      return res.status(400).json({ message: "Expo push token is required." });
+    if (!userId || !fcmToken) {
+      return res.status(400).json({ message: 'User ID and FCM token are required.' });
     }
   
-    // Assuming req.user contains the authenticated user's information
-    const user = await User.findByIdAndUpdate(
-      req.user._id,
-      { expoPushToken },
-      { new: true }
-    );
+    try {
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found.' });
+      }
   
-    if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      user.fcmToken = fcmToken;
+      await user.save();
+  
+      res.status(200).json({ success: true, message: 'FCM token saved successfully.' });
+    } catch (error) {
+      console.error('Error saving FCM token:', error);
+      res.status(500).json({ message: 'Server error. Please try again later.' });
     }
-  
-    res.status(200).json({
-      success: true,
-      message: 'Expo push token updated successfully',
-      user,
-    });
   });
-
+  
+  
 module.exports = {
     registerUser,
     registerUsersByAdmin,
@@ -475,5 +474,5 @@ module.exports = {
     enableUser ,
     approveUser, 
     rejectUser,
-    updateExpoPushToken,
+    saveFcmToken
 };

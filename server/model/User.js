@@ -38,10 +38,10 @@ const userSchema = new mongoose.Schema(
             type: Boolean,
             default: true // Active by default; set to false if user deletes account
         },
-        expoPushToken: {
-            type: String, 
+        fcmToken: {  // Update this to store FCM token
+            type: String,
             default: null
-          },
+        },
         isAccepted: {
             type: Boolean,
             default: function() { return this.role === 'normal'; } // Auto-accepted for normal users; requires admin approval for others

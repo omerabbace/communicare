@@ -78,7 +78,7 @@ const ServiceProviderApprovalScreen = () => {
   };
 
   return (
-    <div className="service-provider-approval-container">
+    <div className="approval-container">
       <Sidebar />
 
       <div className="content">

@@ -18,6 +18,7 @@ const Sidebar = () => {
   const [isProfileOpen, setProfileOpen] = useState(false);
   const [isUserOpen , setUserOpen] = useState(false);
   const [isApprovals , setApprovals] = useState(false);
+  const [isIssues , setIssues] = useState(false);
   const toggleProfileMenu = () => {
     setProfileOpen(!isProfileOpen);
   };
@@ -26,6 +27,9 @@ const Sidebar = () => {
   }
   const toggleApprovls =()=>{
     setApprovals(!isApprovals);
+  }
+  const toggleIssues =()=>{
+    setIssues(!isIssues);
   }
 
   return (
@@ -104,6 +108,36 @@ const Sidebar = () => {
             <FontAwesomeIcon icon={faListAlt} className="icon" /> Issue Categories
           </Link>
         </li>
+        <li>
+          <Link to="/completedIssues">
+            <FontAwesomeIcon icon={faListAlt} className="icon" /> Completed Issues
+          </Link>
+        </li><li>
+          <Link to="/inprogressIssues">
+            <FontAwesomeIcon icon={faListAlt} className="icon" /> Progress Reports
+          </Link>
+        </li>
+        <li onClick={toggleIssues }>
+          <Link>
+          <FontAwesomeIcon icon={faUser} className="icon" /> Reported Issues
+          </Link>
+          {isIssues &&(
+            <ul className='submenu'>
+              <li>
+                <Link to="/reportedissues">
+                  <FontAwesomeIcon icon={faListAlt} className="icon" /> Pending Issues
+                </Link>
+                
+                <Link to="/rejectedissues">
+                  <FontAwesomeIcon icon={faListAlt} className="icon" /> Rejected Issues
+                </Link>
+                <Link to="/assignedtasks">
+                 <FontAwesomeIcon icon={faListAlt} className="icon" /> Assigned Tasks
+                 </Link>
+              </li>
+            </ul>
+          )}
+          </li>
         <li>
           <Link to="/poll">
             <FontAwesomeIcon icon={faPoll} className="icon" /> Poll

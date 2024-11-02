@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { IconButton, Menu, MenuItem, Box } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 
-const IssueTable = ({ rows, onView, onReject, showReject, showApprove , onApprove = true }) => { // Default showReject to true
+// AssignedTaskTable Component to display the list of assigned tasks
+const AssignedTaskTable = ({ rows, onView }) => {
   const columns = [
     { field: 'issueType', headerName: 'Issue Type', headerAlign: 'center', align: 'center', width: 200 },
-    { field: 'description', headerName: 'Description', width: 300, renderCell: (params) => <span>{params.value}</span> },
-    { field: 'name', headerName: 'Reported By', headerAlign: 'center', align: 'center', width: 200 },
-    { field: 'date', headerName: 'Reported Date', headerAlign: 'center', align: 'center', width: 180 },
+    { field: 'description', headerName: 'Description', width: 300 },
+    { field: 'requiredVolunteers', headerName: 'Required Volunteers', headerAlign: 'center', align: 'center', width: 200 },
+    { field: 'assignedVolunteers', headerName: 'Accepted Volunteers', headerAlign: 'center', align: 'center', width: 200,  },
+    { field: 'status', headerName: 'Status', headerAlign: 'center', align: 'center', width: 150 },
     { field: 'actions', headerName: 'Actions', headerAlign: 'center', align: 'center', width: 150, renderCell: (params) => (
-      <ActionMenu id={params.row._id} onView={onView} onReject={onReject} onApprove={onApprove} showApprove={showApprove}  showReject={showReject} /> // Pass showReject
+      <ActionMenu id={params.row._id} onView={onView} />
     ) },
   ];
 
@@ -46,9 +48,9 @@ const IssueTable = ({ rows, onView, onReject, showReject, showApprove , onApprov
   );
 };
 
-// ActionMenu Component to handle actions for each issue
-const ActionMenu = ({ id, onView, onReject, onApprove, showReject, showApprove }) => {
-  const [anchorEl, setAnchorEl] = useState(null);
+// ActionMenu Component for "See Full Details"
+const ActionMenu = ({ id, onView }) => {
+  const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -58,16 +60,6 @@ const ActionMenu = ({ id, onView, onReject, onApprove, showReject, showApprove }
     setAnchorEl(null);
   };
 
-  const handleReject = async () => {
-    await onReject(id);
-    handleClose();
-  };
-
-  const handleApprove = () => {
-    onApprove(id); // Trigger the approval process
-    handleClose();
-  };
-
   return (
     <>
       <IconButton onClick={handleClick}>
@@ -75,12 +67,9 @@ const ActionMenu = ({ id, onView, onReject, onApprove, showReject, showApprove }
       </IconButton>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
         <MenuItem onClick={() => { onView(id); handleClose(); }}>See Full Details</MenuItem>
-        {showReject && <MenuItem onClick={handleReject}>Reject</MenuItem>}
-        {showApprove && < MenuItem onClick={handleApprove}>Approve</MenuItem> }
       </Menu>
     </>
   );
 };
 
-
-export default IssueTable;
+export default AssignedTaskTable;

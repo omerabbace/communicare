@@ -1,83 +1,140 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios'; // For making API requests
-import { BASE_URL } from '../config'; // Base URL configuration
-import Sidebar from '../components/Sidebar'; // Sidebar component
-import IssueTable from '../components/IssueTable'; // The issue table component
-import { Modal } from '@mui/material'; // For modal
-import IssueDetailsModal from '../components/IssueDetailsModal'; // Modal for issue details
-import '../styles/IssuesScreen.css'; // Custom CSS for this screen
-
+import axios from 'axios';
+import { BASE_URL } from '../config';
+import Sidebar from '../components/Sidebar';
+import IssueTable from '../components/IssueTable';
+import { Modal } from '@mui/material';
+import IssueDetailsModal from '../components/IssueDetailsModal';
+import ApproveModal from '../components/IssueApprovalModal';
+import { useNavigate } from 'react-router-dom';
+import '../styles/IssuesScreen.css';
 const IssuesScreen = () => {
-  const [issues, setIssues] = useState([]); // State to store the list of issues
-  const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility state
-  const [selectedIssue, setSelectedIssue] = useState(null); // Track the selected issue for the modal
+  const [issues, setIssues] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isApproveModalOpen, setIsApproveModalOpen] = useState(false); // New state for ApproveModal
+  const [selectedIssue, setSelectedIssue] = useState(null);
+  const [reloadData, setReloadData] = useState(false);
+  const navigate = useNavigate();
 
-  // Fetch issues when the component mounts
-  useEffect(() => {
-    const fetchIssues = async () => {
-      try {
-        // Get token from localStorage
-        const token = localStorage.getItem('token');
+  const fetchIssues = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${BASE_URL}/api/issueReporting/admin/issues`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-        // Make API request to fetch issues
-        const response = await axios.get(`${BASE_URL}/api/issueReporting/admin/issues`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const fetchedIssues = response.data.issues.map(item =>{
-            const formattedDate = new Date(item.createdAt).toLocaleString('en-GB');
-            const name = item.reportedBy.name;
-            const media = item.media.uri;
-            return{
-                date : formattedDate,  
-                name : name,
-                media : media,
-                ...item,
+      const fetchedIssues = response.data.issues.map(item => {
+        const formattedDate = new Date(item.createdAt).toLocaleString('en-GB');
+        const name = item.reportedBy.name;
+        const media = item.media.uri;
+        return {
+          date: formattedDate,
+          name: name,
+          media: media,
+          ...item,
         };
-        });
-        // Set issues data if request is successful
-        setIssues(fetchedIssues);
-      } catch (error) {
-        console.error('Error fetching issues:', error);
-      }
-    };
+      });
 
+      setIssues(fetchedIssues);
+    } catch (error) {
+      console.error('Error fetching issues:', error);
+    }
+  };
+
+  useEffect(() => {
     fetchIssues();
-  }, []);
+  }, [reloadData]);
 
-  // Handle opening the modal and setting the selected issue
   const handleViewDetails = (id) => {
     const issueToView = issues.find(issue => issue._id === id);
-    setSelectedIssue(issueToView); 
+    setSelectedIssue(issueToView);
     setIsModalOpen(true);
   };
 
-  // Handle closing the modal
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedIssue(null);
+    setReloadData(prev => !prev);
   };
+
+  const handleReject = async (issueId) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(`${BASE_URL}/api/issueReporting/issues/${issueId}/reject`, null, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      navigate('/rejectedissues');
+    } catch (error) {
+      console.error('Error rejecting issue:', error);
+    }
+  };
+
+  const handleApprove = (id) => {
+    const issueToApprove = issues.find(issue => issue._id === id);
+    setSelectedIssue(issueToApprove);
+    setIsApproveModalOpen(true); // Open Approve Modal
+  };
+
+  const handleAssignTask = async (issueId, volunteers) => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Send request to set required volunteers for the issue
+      await axios.put(`${BASE_URL}/api/issueReporting/set-required-volunteers`, {
+        issueId,
+        requiredVolunteers: volunteers,
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      setIsApproveModalOpen(false);
+      navigate('/assignedtasks');
+    } catch (error) {
+      console.error('Error assigning task:', error);
+      alert('Failed to assign task. Please try again.');
+    }
+  };
+  
 
   return (
     <div className="issues-screen-container">
-      {/* Sidebar */}
       <Sidebar />
-
-      {/* Main Content */}
       <div className="content">
         <div className="header-container">
           <h2>Reported Issues</h2>
         </div>
 
-        {/* Issues Table */}
-        <IssueTable rows={issues} onView={handleViewDetails} />
+        <IssueTable
+          rows={issues}
+          onView={handleViewDetails}
+          onReject={handleReject}
+          onApprove={handleApprove}
+          showReject={true}
+          showApprove={true}
+        />
 
-        {/* Modal for Viewing Issue Details */}
         <Modal open={isModalOpen} onClose={handleCloseModal}>
           <div>
             {selectedIssue && (
               <IssueDetailsModal issue={selectedIssue} onClose={handleCloseModal} />
+            )}
+          </div>
+        </Modal>
+
+        <Modal open={isApproveModalOpen} onClose={() => setIsApproveModalOpen(false)}>
+          <div>
+            {selectedIssue && (
+              <ApproveModal
+                issue={selectedIssue}
+                onClose={() => setIsApproveModalOpen(false)}
+                onAssignTask={handleAssignTask}
+              />
             )}
           </div>
         </Modal>

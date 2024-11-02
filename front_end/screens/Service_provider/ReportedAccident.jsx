@@ -75,7 +75,7 @@ const ViewReportedAccidents = () => {
     };
 
     const fetchAccidents = async () => {
-        try {
+        try {   
             setLoading(true);
             const token = await AsyncStorage.getItem('userSession')
                 .then(data => JSON.parse(data)?.token);

@@ -23,20 +23,17 @@ import EditUserForm from './components/EditUserForm';
 import VolunteerApprovalScreen from './screens/VolunteerApprovalScreen';
 import ServiceProviderApprovalScreen from './screens/ServiceProviderApprovalScreen';
 import IssuesScreen from './screens/IssuesScreen';
+import RejectedIssuesScreen from './screens/RejectedIssuesScreen';
+import AssignedTasksScreen from './screens/AssignedTasksScreen';
+import CompletedIssuesScreen from './screens/CompletedIssuesScreen';
+import InProgressIssuesScreen from './screens/InProgressIssuesScreen';
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<DefaultPage />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/volunteerApprovals" element={<VolunteerApprovalScreen />} />
-        <Route path="/serviceApprovals" element={<ServiceProviderApprovalScreen />} />
-        {/* <Route path="/edituserform" element={<EditUserForm />} /> */}
-        <Route path="/issuesScreen" element={<IssuesScreen />} />
-
-
-        
+        <Route path="/register" element={<Register />} />     
         {/* Protected */}
         <Route path="/dashboard" element={<ProtectedRoute element={Dashboard} />} />
         <Route path="/profileManage" element={<ProtectedRoute element={ProfileManage} />} />
@@ -55,6 +52,13 @@ function App() {
         <Route path="/volunteerForm" element={<ProtectedRoute element={VolunteerForm} />} />
         <Route path="/serviceproviderForm" element={<ProtectedRoute element={ServiceProviderForm} />} />
         <Route path="/edituserform" element={<ProtectedRoute element={EditUserForm} />} />
+        <Route path="/serviceApprovals" element={<ProtectedRoute element={ServiceProviderApprovalScreen} />} />
+        <Route path="/volunteerApprovals" element={<ProtectedRoute element={VolunteerApprovalScreen} />} />
+        <Route path="/reportedissues" element={<ProtectedRoute element={IssuesScreen} />} />
+        <Route path="/rejectedissues" element={<ProtectedRoute element={RejectedIssuesScreen} />} />
+        <Route path="/assignedtasks" element={<ProtectedRoute element={AssignedTasksScreen} />} />
+        <Route path="/completedIssues" element={<ProtectedRoute element={CompletedIssuesScreen} />} />
+        <Route path="/inprogressIssues" element={<ProtectedRoute element={InProgressIssuesScreen} />} />
         
       </Routes>
     </Router>
