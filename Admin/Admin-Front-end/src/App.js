@@ -27,6 +27,7 @@ import RejectedIssuesScreen from './screens/RejectedIssuesScreen';
 import AssignedTasksScreen from './screens/AssignedTasksScreen';
 import CompletedIssuesScreen from './screens/CompletedIssuesScreen';
 import InProgressIssuesScreen from './screens/InProgressIssuesScreen';
+import Layout from './components/Layout';
 function App() {
   return (
     <Router>
@@ -59,6 +60,7 @@ function App() {
         <Route path="/assignedtasks" element={<ProtectedRoute element={AssignedTasksScreen} />} />
         <Route path="/completedIssues" element={<ProtectedRoute element={CompletedIssuesScreen} />} />
         <Route path="/inprogressIssues" element={<ProtectedRoute element={InProgressIssuesScreen} />} />
+        <Route path="/Layout" element={<ProtectedRoute element={Layout} />} />
         
       </Routes>
     </Router>
