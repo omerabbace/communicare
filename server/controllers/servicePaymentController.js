@@ -1,35 +1,44 @@
 // controllers/servicePaymentController.js
 require('dotenv').config();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
 const ServicePayment = require('../model/ServicePayment');
 const asyncHandler = require('../utilities/CatchAsync');
 const AppError = require('../utilities/AppError');
 
 // Create a Service Payment
 exports.createServicePayment = asyncHandler(async (req, res, next) => {
-    const { serviceProviderId, amount, currency } = req.body;
+    const { serviceProviderId, amount, currency, paymentMethod } = req.body;
 
-    // Create a Payment Intent with Stripe
-    const paymentIntent = await stripe.paymentIntents.create({
-        amount, // amount in cents
-        currency,
-    });
+    try {
+        let paymentIntent = null;
 
-    // Create a new service payment record in the database
-    const newServicePayment = await ServicePayment.create({
-        userId: req.user._id,
-        serviceProviderId,
-        amount,
-        currency,
-        status: 'pending',
-        paymentIntentId: paymentIntent.id,
-    });
+        if (paymentMethod === 'card') {
+            paymentIntent = await stripe.paymentIntents.create({
+                amount,
+                currency,
+            });
+        }
 
-    res.status(201).json({
-        status: 'success',
-        clientSecret: paymentIntent.client_secret,
-        paymentId: newServicePayment._id,
-    });
+        const newServicePayment = await ServicePayment.create({
+            userId: req.user._id,
+            serviceProviderId,
+            amount,
+            currency,
+            status: paymentMethod === 'cash' ? 'completed' : 'pending',
+            paymentMethod,
+            paymentIntentId: paymentIntent ? paymentIntent.id : undefined,
+        });
+
+        res.status(201).json({
+            status: 'success',
+            clientSecret: paymentIntent ? paymentIntent.client_secret : null,
+            paymentId: newServicePayment._id,
+        });
+    } catch (error) {
+        console.error("Error in createServicePayment:", error.message);
+        next(new AppError("Internal Server Error", 500));
+    }
 });
 
 // Get All Service Payments
@@ -48,5 +57,27 @@ exports.getServicePayments = asyncHandler(async (req, res, next) => {
         status: 'success',
         results: servicePayments.length,
         data: servicePayments
+    });
+});
+// Complete Payment
+exports.completePayment = asyncHandler(async (req, res, next) => {
+    const { requestId, paymentMethod, amount, status } = req.body;
+
+    const paymentRecord = await ServicePayment.findOne({ userId: requestId });
+
+    if (!paymentRecord) {
+        return next(new AppError('Payment record not found', 404));
+    }
+
+    paymentRecord.status = status;
+    paymentRecord.paymentMethod = paymentMethod;
+    paymentRecord.completedAt = new Date();
+
+    await paymentRecord.save();
+
+    res.status(200).json({
+        status: 'success',
+        message: 'Payment completed successfully',
+        data: paymentRecord,
     });
 });

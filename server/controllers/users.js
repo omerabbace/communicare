@@ -1,10 +1,13 @@
 
 const asyncHandler = require('../utilities/CatchAsync');
+const mongoose = require('mongoose')
 const User = require('../model/User');
 const AppError = require('../utilities/AppError');
 const generateToken = require('../utilities/getToken');
 const matchPass = require('../utilities/MatchPassword');
 const bcrypt = require('bcrypt');
+const uploadProfilePicture = require('../middlewares/uploadProfilePicture');
+
 
 // Register User
 const registerUser = asyncHandler(async (req, res) => {
@@ -167,6 +170,7 @@ const loginUser = asyncHandler(async (req, res) => {
                     role: userAccount.role,
                     cnic: userAccount.cnic,
                     serviceCategory: userAccount.serviceCategory,
+                    profilePicture: userAccount.profilePicture,
                     token: generateToken({
                         _id: userAccount._id,
                         name: userAccount.name,
@@ -191,46 +195,114 @@ const loginUser = asyncHandler(async (req, res) => {
 });
 
 // Update Profile
-const updateProfile = asyncHandler(async (req, res) => {
-    const { userId } = req.params;
-    const { email, name, phone, role, cnic, serviceCategory } = req.body;
 
-    // Validate required fields
-    if (!name || !email || !phone || !role) {
-        throw new AppError("Enter all the required fields", 400);
-    }
-
-    // Additional validation for volunteer and service provider roles
-    if (role !== 'normal' && !cnic) {
-        throw new AppError("CNIC is required for volunteers and service providers", 400);
-    }
-    if (role === 'serviceProvider' && !serviceCategory) {
-        throw new AppError("Service category is required for service providers", 400);
-    }
-
-    // Check if the user with the given ID exists
-    const user = await User.findById(userId);
-    if (!user) {
-        throw new AppError("User not found", 404);
-    }
-
-    // Update user's details
-    user.email = email || user.email;
-    user.name = name || user.name;
-    user.phone = phone || user.phone;
-    user.role = role || user.role;
-    user.cnic = role !== 'normal' ? cnic : null;
-    user.serviceCategory = role === 'serviceProvider' ? serviceCategory : null;
-
-    // Save the updated user
-    await user.save();
-
-    res.status(200).json({
-        success: true,
-        message: 'Profile updated successfully',
-        data: user
+// Update Profile
+const updateProfile = asyncHandler(async (req, res, next) => {
+    uploadProfilePicture(req, res, async (err) => {
+      if (err) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({
+            success: false,
+            message: 'File size exceeds the 10MB limit.',
+          });
+        }
+  
+        console.error('Error during file upload:', err);
+        return res.status(500).json({ message: 'File upload error', error: err.message });
+      }
+  
+      try {
+        const { userId } = req.params;
+        const { email, name, phone, role, cnic, serviceCategory } = req.body;
+  
+        // Validate required fields
+        if (!name || !email || !phone || !role) {
+          throw new AppError('Enter all the required fields', 400);
+        }
+  
+        // Additional validation for volunteer and service provider roles
+        if (role !== 'normal' && !cnic) {
+          throw new AppError('CNIC is required for volunteers and service providers', 400);
+        }
+        if (role === 'serviceProvider' && !serviceCategory) {
+          throw new AppError('Service category is required for service providers', 400);
+        }
+  
+        // Check if the user exists
+        const user = await User.findById(userId);
+        if (!user) {
+          throw new AppError('User not found', 404);
+        }
+  
+        // Update user details
+        user.email = email || user.email;
+        user.name = name || user.name;
+        user.phone = phone || user.phone;
+        user.role = role || user.role;
+        user.cnic = role !== 'normal' ? cnic : null;
+        user.serviceCategory = role === 'serviceProvider' ? serviceCategory : null;
+  
+        // Update profile picture
+        if (req.file) {
+          user.profilePicture = `/uploads/profile-pictures/${req.file.filename}`;
+        }
+  
+        // Save the user
+        await user.save();
+  
+        res.status(200).json({
+          success: true,
+          message: 'Profile updated successfully',
+          data: user,
+        });
+      } catch (error) {
+        console.error('Error updating profile:', error);
+        next(error);
+      }
     });
-});
+  });
+  
+
+// const updateProfile = asyncHandler(async (req, res) => {
+//     const { userId } = req.params;
+//     const { email, name, phone, role, cnic, serviceCategory } = req.body;
+
+//     // Validate required fields
+//     if (!name || !email || !phone || !role) {
+//         throw new AppError("Enter all the required fields", 400);
+//     }
+
+//     // Additional validation for volunteer and service provider roles
+//     if (role !== 'normal' && !cnic) {
+//         throw new AppError("CNIC is required for volunteers and service providers", 400);
+//     }
+//     if (role === 'serviceProvider' && !serviceCategory) {
+//         throw new AppError("Service category is required for service providers", 400);
+//     }
+
+//     // Check if the user with the given ID exists
+//     const user = await User.findById(userId);
+//     if (!user) {
+//         throw new AppError("User not found", 404);
+//     }
+
+//     // Update user's details
+//     user.email = email || user.email;
+//     user.name = name || user.name;
+//     user.phone = phone || user.phone;
+//     user.role = role || user.role;
+//     user.cnic = role !== 'normal' ? cnic : null;
+//     user.serviceCategory = role === 'serviceProvider' ? serviceCategory : null;
+
+//     // Save the updated user
+//     await user.save();
+
+//     res.status(200).json({
+//         success: true,
+//         message: 'Profile updated successfully',
+//         data: user
+//     });
+// });
 
 // Change Password
 const changePassword = asyncHandler(async (req, res) => {
@@ -459,6 +531,74 @@ const saveFcmToken = asyncHandler(async (req, res, next) => {
     }
   });
   
+//   const updatePushNotificationToken = async (req, res) => {
+//     const { pushNotificationToken } = req.body;
+//     console.log("hello backend" ,pushNotificationToken );
+//     if (!pushNotificationToken) {
+//       return res.status(400).json({ success: false, message: 'Push notification token is required' });
+//     }
+  
+//     try {
+//     console.log("hello backend user");
+
+//       // Update the user's push notification token
+//       const user = await User.findByIdAndUpdate(
+//         console.log("hello backend user ew",req.user.id),
+
+//         req.user.id, // Authenticated user's ID from auth middleware
+//         { pushNotificationToken }, // Update field
+//         { new: true } // Return the updated document
+//       );
+  
+//       if (!user) {
+//         return res.status(404).json({ success: false, message: 'User not found' });
+//       }
+  
+//       res.json({ success: true, message: 'Push token updated successfully', user });
+//     } catch (error) {
+//       console.error('Error updating push token:', error);
+//       res.status(500).json({ success: false, message: 'Internal server error' });
+//     }
+//   };
+const updatePushNotificationToken = async (req, res) => {
+    const { pushNotificationToken } = req.body;
+  
+    if (!pushNotificationToken) {
+      return res.status(400).json({ success: false, message: 'Push notification token is required' });
+    }
+  
+    try {
+      console.log('Received token:', pushNotificationToken);
+      console.log('Authenticated user ID:', req.user.id);
+  
+      const userId = req.user.id;
+  
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).json({ success: false, message: 'Invalid user ID format' });
+      }
+  
+      // Update the user's push notification token
+      const user = await User.findByIdAndUpdate(
+        userId,
+        { pushNotificationToken },
+        { new: true }
+      );
+  
+      if (!user) {
+        console.log('User not found in the database');
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+  
+      res.json({ success: true, message: 'Push token updated successfully', user });
+    } catch (error) {
+      console.error('Error updating push token:', error);
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  };
+  
+  
+
+
   
 module.exports = {
     registerUser,
@@ -474,5 +614,6 @@ module.exports = {
     enableUser ,
     approveUser, 
     rejectUser,
-    saveFcmToken
+    saveFcmToken,
+    updatePushNotificationToken,
 };

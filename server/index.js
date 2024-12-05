@@ -15,6 +15,9 @@ const donationRoutes = require('./routes/donationRoutes');
 const servicePaymentRoutes = require('./routes/servicePaymentRoutes');
 const charityProjectRoutes = require('./routes/charityProjectRoutes');
 const issueReportingRoutes = require('./routes/issueReportingRoutes');
+const vehiceAssistance = require('./routes/vehicleAssistance');
+const notificationa = require('./routes/notificationRoutes');
+const notificationsBackend = require('./routes/notificationBackend');
 const path = require('path');
 
 const dotenv = require('dotenv')
@@ -43,6 +46,9 @@ app.use('/api/donations',donationRoutes);
 app.use('/api/payments',servicePaymentRoutes);
 app.use('/api/charityProjects', charityProjectRoutes);
 app.use('/api/issueReporting', issueReportingRoutes);
+app.use('/api/vehicle-assistance', vehiceAssistance);
+app.use('/api/notifications', notificationa);
+app.use('/api/notificationsBackend', notificationsBackend);
 
 // Error middlewares
 app.use(notFound);

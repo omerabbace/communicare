@@ -26,6 +26,14 @@ const ServicePaymentSchema = new mongoose.Schema({
   paymentIntentId: {
     type: String,
   },
+  paymentMethod: {
+    type: String,
+    enum: ['cash', 'card'], // Allowed values
+    required: true,
+  },
+  completedAt: {
+    type: Date,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

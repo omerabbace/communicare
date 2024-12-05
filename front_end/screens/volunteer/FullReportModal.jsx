@@ -23,17 +23,25 @@ const FullReportModal = ({ visible, onClose, adminReport }) => {
             data={adminReport.media}
             keyExtractor={(item, index) => index.toString()}
             horizontal
-            renderItem={({ item }) => (
-              <View style={styles.mediaContainer}>
-                {item.type === 'image' ? (
-                  <Image source={{ uri: `${BASE_URL}/${item.uri}` }} style={styles.media} />
-                ) : (
-                  <Text style={styles.videoText}>Video file - tap to view</Text> // Placeholder for videos
-                )}
-              </View>
-            )}
+            renderItem={({ item }) => {
+              // console.log("Rendering media item:", item); // Log the item details for debugging
+              return (
+                <View style={styles.mediaContainer}>
+                  {item.type === 'image' ? (
+                    <Image
+                      source={{ uri: `${BASE_URL}/${item.uri.replace('\\', '/')}` }} // Ensure proper URL format
+                      style={styles.media}
+                      onError={(e) => console.error("Image load error:", e.nativeEvent.error)} // Debug image loading errors
+                    />
+                  ) : (
+                    <Text style={styles.videoText}>Video file - tap to view</Text>
+                  )}
+                </View>
+              );
+            }}
             ListEmptyComponent={<Text style={styles.noMediaText}>No media files available</Text>}
           />
+
 
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
             <Text style={styles.closeButtonText}>Close</Text>
@@ -114,7 +122,7 @@ const styles = StyleSheet.create({
   closeButton: {
     marginTop: 20,
     padding: 10,
-    backgroundColor: '#007bff',
+    backgroundColor: '#aa18ea',
     borderRadius: 5,
     alignItems: 'center',
   },

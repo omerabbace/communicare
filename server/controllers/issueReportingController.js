@@ -2,8 +2,10 @@ const asyncHandler = require('../utilities/CatchAsync');
 const AppError = require('../utilities/AppError');
 const Issue = require('../model/IssueReporting');
 const User = require('../model/User');
-const { notifyAllVolunteers } = require('../services/notificationService');
 const upload = require('../middlewares/upload');
+const { sendPushNotification } = require('../controllers/notificationsController'); // Import your push notification function
+const Notification = require('../model/Notification'); // Import the Notification model
+
 
 // Controller to create an issue (reported by a normal user)
 exports.createIssue = asyncHandler(async (req, res) => {
@@ -184,6 +186,44 @@ exports.getCompletedIssues = asyncHandler(async (req, res, next) => {
 
 
 
+// // Controller to report task status to the normal user
+// exports.reportTaskStatus = asyncHandler(async (req, res, next) => {
+//   const { issueId } = req.params;
+//   const { description } = req.body; // Only accept description, as media will come from completionReport
+
+//   // Find the issue by ID and populate necessary fields
+//   const issue = await Issue.findById(issueId)
+//       .populate('reportedBy assignedVolunteers leader')
+//       .exec();
+
+//   if (!issue) {
+//       return next(new AppError('Issue not found.', 404));
+//   }
+
+//   // Ensure there is a completion report to use for the admin's report media
+//   if (!issue.completionReport || !issue.completionReport.media) {
+//       return next(new AppError('No completion report media available to include in the admin report.', 400));
+//   }
+
+//   // Update the issue's admin report with the admin's description and the leader's completion report media
+//   issue.adminReport = {
+//       description: description || issue.adminReport?.description || '', // Admin-provided description
+//       media: issue.completionReport.media, // Use media from the leader's completion report
+//       date: Date.now() // Set the current date for the report submission
+//   };
+
+//   // Save the updated issue
+//   await issue.save(); 
+
+//   res.status(200).json({
+//       success: true,
+//       message: 'Admin report submitted successfully to the user.',
+//       issue
+//   });
+// });
+
+
+
 // Controller to report task status to the normal user
 exports.reportTaskStatus = asyncHandler(async (req, res, next) => {
   const { issueId } = req.params;
@@ -191,34 +231,48 @@ exports.reportTaskStatus = asyncHandler(async (req, res, next) => {
 
   // Find the issue by ID and populate necessary fields
   const issue = await Issue.findById(issueId)
-      .populate('reportedBy assignedVolunteers leader')
-      .exec();
+    .populate('reportedBy assignedVolunteers leader')
+    .exec();
 
   if (!issue) {
-      return next(new AppError('Issue not found.', 404));
+    return next(new AppError('Issue not found.', 404));
   }
 
   // Ensure there is a completion report to use for the admin's report media
   if (!issue.completionReport || !issue.completionReport.media) {
-      return next(new AppError('No completion report media available to include in the admin report.', 400));
+    return next(
+      new AppError('No completion report media available to include in the admin report.', 400)
+    );
   }
 
   // Update the issue's admin report with the admin's description and the leader's completion report media
   issue.adminReport = {
-      description: description || issue.adminReport?.description || '', // Admin-provided description
-      media: issue.completionReport.media, // Use media from the leader's completion report
-      date: Date.now() // Set the current date for the report submission
+    description: description || issue.adminReport?.description || '', // Admin-provided description
+    media: issue.completionReport.media, // Use media from the leader's completion report
+    date: Date.now(), // Set the current date for the report submission
   };
 
   // Save the updated issue
-  await issue.save(); 
+  await issue.save();
+
+  // Add in-app notification for the user who reported the issue
+  if (issue.reportedBy) {
+    await Notification.create({
+      userId: issue.reportedBy._id, // The user who reported the issue
+      title: 'Reported Issue Completed',
+      body: `An admin has updated the status for the issue "${issue.issueType}".`,
+      isRead: false, // Mark as unread by default
+      createdAt: new Date(),
+    });
+  }
 
   res.status(200).json({
-      success: true,
-      message: 'Admin report submitted successfully to the user.',
-      issue
+    success: true,
+    message: 'Admin report submitted successfully to the user.',
+    issue,
   });
 });
+
 
 // Controller to get all reports for issues reported by a specific user
 exports.getUserReportedIssues = asyncHandler(async (req, res, next) => {
@@ -422,7 +476,35 @@ exports.leaderLeaveTask = asyncHandler(async (req, res, next) => {
 //     issue,
 //   });
 // });
-// Controller to set required volunteers and notify them using Firebase Cloud Messaging (FCM)
+// Controller to set required volunteers 
+// exports.setRequiredVolunteers = asyncHandler(async (req, res, next) => {
+//   const { issueId, requiredVolunteers } = req.body;
+
+//   // Validate input
+//   if (!issueId || !requiredVolunteers) {
+//     return next(new AppError('Please provide issueId and required volunteers count.', 400));
+//   }
+
+//   // Find the issue by ID
+//   const issue = await Issue.findById(issueId);
+
+//   if (!issue) {
+//     return next(new AppError('Issue not found.', 404));
+//   }
+
+//   // Update issue with required volunteers and change status to 'in progress'
+//   issue.requiredVolunteers = requiredVolunteers;
+//   issue.status = 'in progress';
+//   await issue.save();
+
+//   // Respond with success
+//   res.status(200).json({
+//     success: true,
+//     message: `Volunteer requirement for issue ${issueId} has been set to ${requiredVolunteers}.`,
+//     issue,
+//   });
+// });
+
 exports.setRequiredVolunteers = asyncHandler(async (req, res, next) => {
   const { issueId, requiredVolunteers } = req.body;
 
@@ -432,7 +514,7 @@ exports.setRequiredVolunteers = asyncHandler(async (req, res, next) => {
   }
 
   // Find the issue by ID
-  const issue = await Issue.findById(issueId);
+  const issue = await Issue.findById(issueId).populate('reportedBy', '_id name email');
 
   if (!issue) {
     return next(new AppError('Issue not found.', 404));
@@ -442,6 +524,17 @@ exports.setRequiredVolunteers = asyncHandler(async (req, res, next) => {
   issue.requiredVolunteers = requiredVolunteers;
   issue.status = 'in progress';
   await issue.save();
+
+  // Create in-app notification for the user who reported the issue
+  if (issue.reportedBy) {
+    await Notification.create({
+      userId: issue.reportedBy._id,
+      title: 'Issue Accepted',
+      body: `The issue "${issue.issueType}" is now set to require ${requiredVolunteers} volunteers.`,
+      isRead: false, // Mark as unread
+      createdAt: new Date(),
+    });
+  }
 
   // Respond with success
   res.status(200).json({
@@ -559,39 +652,132 @@ exports.getUserReportedIssues = asyncHandler(async (req, res, next) => {
 
 
 
+// exports.rejectIssue = async (req, res) => {
+//   try {
+//     const { issueId } = req.params; // Get the issue ID from the request params
+//     const { userId, reason } = req.body; // Assuming the userId of the admin/leader and reason for rejection
+
+//     // Find the issue by ID and update the status to 'rejected'
+//     const issue = await Issue.findByIdAndUpdate(
+//       issueId,
+//       { status: 'rejected' },
+//       { new: true }
+//   ).populate('reportedBy', '_id name email pushNotificationToken');
+
+//     if (!issue) {
+//         return res.status(404).json({ message: 'Issue not found' });
+//     }
+
+//     // Optionally, log the rejection reason or save it somewhere
+//     if (reason) {
+//         issue.rejectionReason = reason; // Optional: Add this field to the schema if desired
+//         await issue.save();
+//     }
+
+//     // Send notifications only to the normal user who reported the issue
+//     const usersToNotify = [];
+
+//     // Add the reported user (the one who raised the issue)
+//     // console.log('issue.reportedBy ',issue.reportedBy );
+//     // console.log('issue.reportedBy.pushNotificationToken',issue.reportedBy.pushNotificationToken);
+//     // console.log('_id', issue.reportedBy._id);
+//     if (issue.reportedBy && issue.reportedBy.pushNotificationToken) {
+//         usersToNotify.push(issue.reportedBy); // Only include the normal user
+//     }
+
+//     // Log users being notified
+//     // console.log('Users to notify:', usersToNotify);
+
+//     // Send push notifications to all relevant users (in this case, only the reporter)
+//     const notificationPromises = usersToNotify.map(user => {
+//         // console.log("Sending notification to user with token:", user.pushNotificationToken);
+//         // console.log("user id:", user._id);
+//         return sendPushNotification({
+//             userId: user._id,  
+//             title: 'Issue Rejected',
+//             body: `The issue "${issue.issueType}" has been rejected. Reason: ${reason || 'No reason provided.'}`,
+//             data: { issueId: issue._id }
+//         });
+//     });
+
+//     // Wait for all notifications to be sent
+//     await Promise.all(notificationPromises);
+
+//     res.status(200).json({ message: 'Issue rejected successfully', issue });
+//   } catch (error) {
+//     console.error('Error rejecting issue:', error);
+//     res.status(500).json({ message: 'Server error, unable to reject issue' });
+//   }
+// };
 
 
-// Controller to reject an issue
 exports.rejectIssue = async (req, res) => {
   try {
-      const { issueId } = req.params; // Get the issue ID from the request params
-      const { userId, reason } = req.body; // Assuming the userId of the admin/leader and reason for rejection
+    const { issueId } = req.params; // Get the issue ID from the request params
+    const { userId, reason } = req.body; // Assuming the userId of the admin/leader and reason for rejection
 
-      // Find the issue by ID and update the status to 'rejected'
-      const issue = await Issue.findByIdAndUpdate(
-          issueId,
-          { status: 'rejected' },
-          { new: true }
-      );
+    // Find the issue by ID and update the status to 'rejected'
+    const issue = await Issue.findByIdAndUpdate(
+      issueId,
+      { status: 'rejected' },
+      { new: true }
+    ).populate('reportedBy', '_id name email pushNotificationToken');
 
-      if (!issue) {
-          return res.status(404).json({ message: 'Issue not found' });
-      }
+    if (!issue) {
+      return res.status(404).json({ message: 'Issue not found' });
+    }
 
-      // Optionally, log the rejection reason or save it somewhere
-      // For example, you can add a "rejectionReason" field to the schema if needed
-      if (reason) {
-          // You can update this issue with the rejection reason if necessary
-          issue.rejectionReason = reason; // Optional: Add this field to the schema if desired
-          await issue.save();
-      }
+    // Optionally, log the rejection reason or save it somewhere
+    if (reason) {
+      issue.rejectionReason = reason; // Optional: Add this field to the schema if desired
+      await issue.save();
+    }
 
-      res.status(200).json({ message: 'Issue rejected successfully', issue });
+    // Send notifications only to the normal user who reported the issue
+    const usersToNotify = [];
+
+    if (issue.reportedBy && issue.reportedBy.pushNotificationToken) {
+      usersToNotify.push(issue.reportedBy); // Only include the normal user
+    }
+
+    // Prepare notification data
+    const notificationData = {
+      title: 'Issue Rejected',
+      body: `The issue "${issue.issueType}" has been rejected. Reason: ${reason || 'No reason provided.'}`,
+      data: { issueId: issue._id },
+    };
+
+    // Send push notifications to all relevant users (in this case, only the reporter)
+    const pushNotificationPromises = usersToNotify.map((user) =>
+      sendPushNotification({
+        userId: user._id,
+        title: notificationData.title,
+        body: notificationData.body,
+        data: notificationData.data,
+      })
+    );
+
+    // Send in-app notifications
+    const inAppNotificationPromises = usersToNotify.map((user) =>
+      Notification.create({
+        userId: user._id,
+        title: notificationData.title,
+        body: notificationData.body,
+        isRead: false, // Unread by default
+        createdAt: new Date(),
+      })
+    );
+
+    // Wait for both push notifications and in-app notifications to complete
+    await Promise.all([...pushNotificationPromises, ...inAppNotificationPromises]);
+
+    res.status(200).json({ message: 'Issue rejected successfully', issue });
   } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Server error, unable to reject issue' });
+    console.error('Error rejecting issue:', error);
+    res.status(500).json({ message: 'Server error, unable to reject issue' });
   }
 };
+
 
 exports.getRejectedIssues = asyncHandler(async (req, res, next) => {
   // Fetch only issues where the status is 'rejected'
@@ -644,6 +830,57 @@ exports.assignSubTask = async (req, res) => {
       res.status(500).json({ message: 'Server error, unable to assign sub-task' });
   }
 };
+
+
+// exports.assignSubTask = async (req, res) => {
+//   try {
+//       const { issueId } = req.params; // The issue ID
+//       const { assignedTo, description, media } = req.body; // Sub-task details
+
+//       // Find the issue and check if the requestor is the team leader
+//       const issue = await Issue.findById(issueId);
+//       if (!issue) {
+//           return res.status(404).json({ message: 'Issue not found' });
+//       }
+
+//       // Check if the logged-in user is the team leader
+//       if (String(issue.leader) !== String(req.user._id)) {
+//           return res.status(403).json({ message: 'Only the team leader can assign sub-tasks' });
+//       }
+
+//       // Create the sub-task
+//       const subTask = {
+//           assignedTo,
+//           description,
+//           media: media || [], // Media array (optional)
+//           status: 'pending'
+//       };
+
+//       // Add the sub-task to the issue
+//       issue.subTasks.push(subTask);
+//       await issue.save();
+//       console.log('assignedTo',assignedTo);
+//       // Populate the assignedTo user details
+//       const userToNotify = await User.findById(assignedTo).select('_id name pushNotificationToken'); // Populate user details
+//       console.log('userToNotify._id',userToNotify._id);
+//       console.log('userToNotify.pushNotificationToken',userToNotify.pushNotificationToken);
+//       if (userToNotify && userToNotify.pushNotificationToken) {
+//           // Send a push notification to the assigned user
+//           await sendPushNotification({
+//               recipientId: userToNotify._id,  
+//               title: 'New Sub-Task Assigned',
+//               body: `You have been assigned a new sub-task for the issue "${issue.issueType}". Please check it out.`,
+//               data: {  issueId: issue._id, subTaskId: subTask._id } // Sending relevant data with the notification
+//           });
+//       }
+
+//       res.status(200).json({ message: 'Sub-task assigned successfully', issue });
+//   } catch (error) {
+//       console.error('Error assigning sub-task:', error);
+//       res.status(500).json({ message: 'Server error, unable to assign sub-task' });
+//   }
+// };
+
 // Controller function to get assigned sub-tasks for an issue
 exports.getAssignedSubTasks = async (req, res) => {
   try {
@@ -662,36 +899,80 @@ exports.getAssignedSubTasks = async (req, res) => {
 };
 
 // Controller to add progress updates on a sub-task by assigned volunteers
+// exports.reportOnSubTask = async (req, res) => {
+//   try {
+//     const { issueId, subTaskId } = req.params;
+//     const { description, media, status } = req.body;
+//     const userId = req.user._id;
+
+//     const issue = await Issue.findById(issueId);
+//     if (!issue) return res.status(404).json({ message: 'Issue not found' });
+
+//     const subTask = issue.subTasks.id(subTaskId);
+//     if (!subTask) return res.status(404).json({ message: 'Sub-task not found' });
+
+//     if (String(subTask.assignedTo) !== String(userId)) {
+//       return res.status(403).json({ message: 'You are not assigned to this sub-task' });
+//     }
+
+//     subTask.progressUpdates.push({
+//       updatedBy: userId,
+//       description,
+//       media: media || [],
+//       status: status || 'pending',
+//       date: Date.now(),
+//     });
+
+//     await issue.save();
+//     res.status(200).json({ message: 'Progress report added successfully', subTask });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: 'Server error, unable to report on sub-task' });
+//   }
+// };
+
+
 exports.reportOnSubTask = async (req, res) => {
-  try {
-    const { issueId, subTaskId } = req.params;
-    const { description, media, status } = req.body;
-    const userId = req.user._id;
-
-    const issue = await Issue.findById(issueId);
-    if (!issue) return res.status(404).json({ message: 'Issue not found' });
-
-    const subTask = issue.subTasks.id(subTaskId);
-    if (!subTask) return res.status(404).json({ message: 'Sub-task not found' });
-
-    if (String(subTask.assignedTo) !== String(userId)) {
-      return res.status(403).json({ message: 'You are not assigned to this sub-task' });
+  upload(req, res, async (err) => {
+    if (err) {
+      console.error('Multer error:', err);
+      return res.status(400).json({ message: err.message });
     }
 
-    subTask.progressUpdates.push({
-      updatedBy: userId,
-      description,
-      media: media || [],
-      status: status || 'pending',
-      date: Date.now(),
-    });
+    try {
+      const { issueId, subTaskId } = req.params;
+      const { description, status } = req.body;
+      const userId = req.user._id;
 
-    await issue.save();
-    res.status(200).json({ message: 'Progress report added successfully', subTask });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error, unable to report on sub-task' });
-  }
+      const issue = await Issue.findById(issueId);
+      if (!issue) return res.status(404).json({ message: 'Issue not found' });
+
+      const subTask = issue.subTasks.id(subTaskId);
+      if (!subTask) return res.status(404).json({ message: 'Sub-task not found' });
+
+      if (String(subTask.assignedTo) !== String(userId)) {
+        return res.status(403).json({ message: 'You are not assigned to this sub-task' });
+      }
+
+      // Collect file paths from uploaded files
+      const mediaPaths = req.files.map((file) => `/uploads/${file.filename}`);
+
+      // Add progress update to the sub-task
+      subTask.progressUpdates.push({
+        updatedBy: userId,
+        description,
+        media: mediaPaths || [],
+        status: status || 'pending',
+        date: Date.now(),
+      });
+
+      await issue.save();
+      res.status(200).json({ message: 'Progress report added successfully', subTask });
+    } catch (error) {
+      console.error('Error reporting sub-task:', error);
+      res.status(500).json({ message: 'Server error, unable to report on sub-task' });
+    }
+  });
 };
 
 // Controller for viewing all reports on a specific sub-task
@@ -746,6 +1027,39 @@ exports.getVolunteerReportsForSubTask = async (req, res) => {
   }
 };
 
+exports.updateSubTaskStatus = asyncHandler(async (req, res) => {
+  const { issueId, subTaskId } = req.params;
+  const { status } = req.body;
+
+  // Validate status value
+  const validStatuses = ['pending', 'in progress', 'completed'];
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({ message: 'Invalid status value' });
+  }
+
+  try {
+    // Find the issue containing the specified sub-task
+    const issue = await Issue.findById(issueId);
+    if (!issue) {
+      return res.status(404).json({ message: 'Issue not found' });
+    }
+
+    // Find the sub-task within the issue
+    const subTask = issue.subTasks.id(subTaskId);
+    if (!subTask) {
+      return res.status(404).json({ message: 'Sub-task not found' });
+    }
+
+    // Update the status of the sub-task
+    subTask.status = status;
+    await issue.save();
+
+    res.status(200).json({ success: true, message: 'Sub-task status updated successfully' });
+  } catch (error) {
+    console.error('Error updating sub-task status:', error);
+    res.status(500).json({ message: 'Server error, unable to update sub-task status' });
+  }
+});
 
 // // Controller for updating a sub-task
 // exports.updateSubTask = async (req, res) => {
@@ -954,6 +1268,7 @@ exports.getVolunteerIssues = asyncHandler(async (req, res) => {
   const issues = await Issue.find({
     assignedVolunteers: { $in: [volunteerId] },
     leader: { $ne: volunteerId },
+    status: { $ne: 'completed' },
   });
 
   // console.log("Fetched Issues for Volunteer:", issues); 
@@ -969,4 +1284,98 @@ exports.getVolunteerIssues = asyncHandler(async (req, res) => {
     success: true,
     issues,
   });
+});
+
+// Controller to get task statistics for a volunteer leader
+exports.getVolunteerLeaderStats = asyncHandler(async (req, res) => {
+  const volunteerId = req.user._id; // Get the logged-in user's ID
+  // console.log(volunteerId);
+  try {
+    // Count the number of completed tasks where the volunteer is the leader
+    const completedTasksCount = await Issue.countDocuments({
+      leader: volunteerId,
+      status: 'completed',
+    });
+
+    // Count the number of pending tasks where the volunteer is the leader
+    const pendingTasksCount = await Issue.countDocuments({
+      leader: volunteerId,
+      status: 'pending',
+    });
+
+    // Count the number of subtasks assigned to the volunteer
+    const assignedSubTasksCount = await Issue.aggregate([
+      { $unwind: '$subTasks' }, // Unwind the subTasks array
+      { $match: { 'subTasks.assignedTo': volunteerId } }, // Match the subtasks assigned to the volunteer
+      { $count: 'count' }, // Count the results
+    ]);
+    const subTasksCount = assignedSubTasksCount[0]?.count || 0; // Default to 0 if no subtasks are found
+
+    // Count the total number of reported issues which are not yet completed
+    const notCompletedIssuesCount = await Issue.countDocuments({
+      status: { $ne: 'completed' },
+    });
+
+    // Return the statistics
+    res.status(200).json({
+      success: true,
+      stats: {
+        completedTasksCount,
+        pendingTasksCount,
+        subTasksCount,
+        notCompletedIssuesCount,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching volunteer leader stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error, unable to fetch stats.',
+    });
+  }
+});
+
+// Controller to fetch stats for a normal user
+exports.getUserIssueStats = asyncHandler(async (req, res) => {
+  const userId = req.user._id; // Get the logged-in user's ID
+
+  try {
+    // Count the number of reported issues by the user
+    const reportedIssuesCount = await Issue.countDocuments({
+      reportedBy: userId,
+    });
+
+    // Count the number of completed issues reported by the user
+    const completedIssuesCount = await Issue.countDocuments({
+      reportedBy: userId,
+      status: 'completed',
+    });
+
+    // Count the number of canceled issues reported by the user
+    const canceledIssuesCount = await Issue.countDocuments({
+      reportedBy: userId,
+      status: 'rejected',
+    });
+    const inProgressIssuesCount = await Issue.countDocuments({
+      reportedBy: userId,
+      status: 'in progress',
+    });
+
+    // Return the stats
+    res.status(200).json({
+      success: true,
+      stats: {
+        reportedIssuesCount,
+        completedIssuesCount,
+        canceledIssuesCount,
+        inProgressIssuesCount
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching user issue stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error, unable to fetch issue stats.',
+    });
+  }
 });

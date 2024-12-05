@@ -1,4 +1,4 @@
-// firebase.js
+// firebaseConfig.js
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getDatabase } from 'firebase/database';
 import { getAuth, initializeAuth, getReactNativePersistence } from 'firebase/auth';

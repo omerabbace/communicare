@@ -40,8 +40,8 @@
     router.get('/issues/:issueId/sub-tasks/:subTaskId/reports', isLogin, issueController.getSubTaskReports);
     // to get report for specific subtask
     router.get('/issues/:issueId/sub-tasks/:subTaskId/volunteer-reports', isLogin, issueController.getVolunteerReportsForSubTask);
-
-
+    // PUT route to update sub-task status
+    router.put('/issues/:issueId/sub-tasks/:subTaskId/update-status',isLogin, issueController.updateSubTaskStatus);
     // Route for getting a specific issue's details (Admin or Volunteer)
     router.get('/issue/:issueId', isLogin, issueController.getIssueById);
     // Route for volunteers to provide progress updates
@@ -81,14 +81,17 @@
     router.get('/user/reported-issues', isLogin, issueController.getUserReportedIssues);
 
     // Route for rejecting an issue
-    router.put('/issues/:issueId/reject', issueController.rejectIssue);
+    router.put('/issues/:issueId/reject',isLogin, issueController.rejectIssue);
     // to get rejected issues
-    router.get('/issues/rejected', issueController.getRejectedIssues);
+    router.get('/issues/rejected',isLogin, issueController.getRejectedIssues);
 
 
 
+    // Route to get statistics for a volunteer leader
+    router.get('/volunteer-leader/stats',isLogin, issueController.getVolunteerLeaderStats);
 
-
+    // Route to fetch user issue stats
+    router.get('/user/stats', isLogin,issueController.getUserIssueStats);
 
     // Route for updating a sub-task
     // router.put('/issues/:issueId/sub-tasks/:subTaskId/update', updateSubTask);

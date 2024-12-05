@@ -38,13 +38,18 @@ const userSchema = new mongoose.Schema(
             type: Boolean,
             default: true // Active by default; set to false if user deletes account
         },
-        fcmToken: {  // Update this to store FCM token
+        pushNotificationToken: {  
             type: String,
-            default: null
+            default: null,
+            index: true
         },
         isAccepted: {
             type: Boolean,
             default: function() { return this.role === 'normal'; } // Auto-accepted for normal users; requires admin approval for others
+        },
+        profilePicture: {
+            type: String, // Store the file path of the uploaded profile picture
+            default: null
         }
     },
     { timestamps: true } // Automatically add `createdAt` and `updatedAt` timestamps

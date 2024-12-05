@@ -180,6 +180,8 @@ const AuthProvider = ({ children }) => {
     await AsyncStorage.removeItem('userSession');
     await AsyncStorage.removeItem('token');
     await AsyncStorage.removeItem('isLeader');
+    // console.log('cleared async storage');
+
   };
 
   // Check if user session and leader status exist in AsyncStorage
@@ -220,7 +222,7 @@ const AuthProvider = ({ children }) => {
         isLoading,
         sessionLoaded,
         isLeader,
-        setIsLeader,  // Expose leader status in the context
+        setIsLeader, 
       }}
     >
       {children}

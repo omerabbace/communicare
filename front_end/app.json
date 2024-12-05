@@ -16,7 +16,8 @@
       "bundleIdentifier": "com.mediamonster.finalyearproject"
     },
     "android": {
-      "googleServicesFIle": "./google-services.json",
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"],
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"

@@ -39,13 +39,13 @@ const LeaderTaskScreen = () => {
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={styles.assignButton}
-          onPress={() => navigation.navigate('assignSubtask', { issueId: item._id })}
+          onPress={() => navigation.navigate('Assign Subtask', { issueId: item._id })}
         >
           <Text style={styles.buttonText}>Assign Task</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.reportButton}
-          onPress={() => navigation.navigate('ReportTaskScreen', { issueId: item._id })}
+          onPress={() => navigation.navigate('Report Task', { issueId: item._id })}
         >
           <Text style={styles.buttonText}>Report to Admin</Text>
         </TouchableOpacity>
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   reportButton: {
-    backgroundColor: "#2196F3",
+    backgroundColor: "#aa18ea",
     padding: 10,
     borderRadius: 5,
     alignItems: "center",

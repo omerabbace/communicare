@@ -34,7 +34,7 @@ const accidentReportSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'accepted', 'in-progress', 'completed'],
+        enum: ['pending','canceled', 'accepted', 'in-progress', 'completed'],
         default: 'pending'  // Status of the accident report
     },
     createdAt: {

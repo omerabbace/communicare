@@ -184,7 +184,7 @@ const VolunteerManagementScreen = () => {
       <Text>Created At: {new Date(item.createdAt).toLocaleString()}</Text>
       <TouchableOpacity
         style={styles.viewTasksButton}
-        onPress={() => navigation.navigate('VolunteerSubTasksScreen', { issueId: item._id })}
+        onPress={() => navigation.navigate('Volunteer SubTasks', { issueId: item._id })}
       >
         <Text style={styles.viewTasksButtonText}>View Tasks</Text>
       </TouchableOpacity>
