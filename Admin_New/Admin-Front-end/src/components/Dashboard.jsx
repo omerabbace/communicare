@@ -247,9 +247,10 @@ const Dashboard = () => {
         );
         setDonations(donationsResponse.data.data);
 
-        const servicePaymentResponse = await axios.get(`${BASE_URL}/api/payments/all`);
-        setServicePayments(servicePaymentResponse.data.data)
-
+        const servicePaymentResponse = await axios.get(
+          `${BASE_URL}/api/payments/all`
+        );
+        setServicePayments(servicePaymentResponse.data.data);
       } catch (err) {
         setErrorMessage("Failed to fetch data.");
         console.error(err);
@@ -320,23 +321,36 @@ const Dashboard = () => {
               <Bar data={chartData} options={options} />
             </div>
           </div>
-          <br />
-          <br />
-          <br />
-          <br />
 
-          <div className="dashboard-charts">
-            <div className="chart-container-dashboard">
+          <br />
+          <br />
+          <br />
+          <br />
+          <div className="dashboard-charts-donations">
+            <div className="chart-container-donations">
               <h3>Donations</h3>
-              <ul>
-                {donations.map((donation) => (
-                  <li key={donation._id}>
-                    Project: {donation.projectId.title}, Amount:{" "}
-                    {donation.amount}, User:{" "}
-                    {donation.userId ? donation.userId.name : "Anonymous"}
-                  </li>
-                ))}
-              </ul>
+              <div className="scrollable-donations">
+                <table className="donations-table">
+                  <thead>
+                    <tr>
+                      <th>Project</th>
+                      <th>Amount</th>
+                      <th>User</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {donations.map((donation) => (
+                      <tr key={donation._id} className="donation-item">
+                        <td>{donation.projectId.title}</td>
+                        <td>{donation.amount}</td>
+                        <td>
+                          {donation.userId ? donation.userId.name : "Anonymous"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
 
@@ -349,21 +363,42 @@ const Dashboard = () => {
             <div className="chart-container-dashboard">
               <h3>Service Payments</h3>
               <div className="scrollable-payments">
-                <ul>
-                  {servicePayments.map((payment) => (
-                    <li key={payment._id}>
-                      User: {payment.userId ? payment.userId.name : "N/A"},{" "}
-                      {/* Handle missing userId */}
-                      Service Provider:{" "}
-                      {payment.serviceProviderId
-                        ? payment.serviceProviderId.name
-                        : "N/A"}
-                      , {/* Handle missing serviceProviderId */}
-                      Amount: {payment.amount} {payment.currency}, Status:{" "}
-                      {payment.status}, Payment Method: {payment.paymentMethod}
-                    </li>
-                  ))}
-                </ul>
+                <table className="payments-table">
+                  <thead>
+                    <tr>
+                      <th>User</th>
+                      <th>Service Provider</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                      <th>Payment Method</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {servicePayments.map((payment) => (
+                      <tr key={payment._id} className="payment-item">
+                        <td>{payment.userId ? payment.userId.name : "N/A"}</td>
+                        <td>
+                          {payment.serviceProviderId
+                            ? payment.serviceProviderId.name
+                            : "N/A"}
+                        </td>
+                        <td>
+                          {payment.amount} {payment.currency}
+                        </td>
+                        <td
+                          className={`payment-status ${payment.status.toLowerCase()}`}
+                        >
+                          {payment.status}
+                        </td>
+                        <td>
+                          {payment.paymentMethod
+                            ? payment.paymentMethod
+                            : "N/A"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>

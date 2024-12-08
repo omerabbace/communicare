@@ -8,7 +8,7 @@ const ServicePaymentSchema = new mongoose.Schema({
   },
   serviceProviderId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'ServiceProvider',
+    ref: 'User',
     required: true,
   },
   amount: {
