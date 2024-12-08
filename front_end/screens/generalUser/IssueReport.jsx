@@ -844,7 +844,8 @@ const IssueReport = ({ issueCategories }) => {
         </TouchableOpacity>
       </View>
       </View>
-      <Modal visible={mapModalVisible} animationType="slide" transparent={true}>
+      {/* <Modal visible={mapModalVisible} animationType="slide" transparent={true}>
+
         <View style={styles.modalContainer}>
           <View style={styles.mapHeader}>
             <TextInput
@@ -878,7 +879,98 @@ const IssueReport = ({ issueCategories }) => {
             <Text style={styles.confirmButtonText}>Confirm Location</Text>
           </TouchableOpacity>
         </View>
-      </Modal>
+      </Modal> */}
+      {/* <Modal visible={mapModalVisible} animationType="slide" transparent={true}>
+  <View style={styles.modalContainer}>
+    {mapLoading && (
+      <View style={styles.loadingOverlay}>
+        <ActivityIndicator style={styles.loader} size="large" color="#aa18ea" />
+      </View>
+    )}
+
+    {!mapLoading && (
+      <>
+        <View style={styles.mapHeader}>
+          <TextInput
+            style={styles.searchBar}
+            placeholder="Search location"
+            value={searchQuery}
+            onChangeText={handleSearch}
+          />
+          <TouchableOpacity onPress={handleCloseModal} style={styles.closeButton}>
+            <Text style={styles.closeButtonText}>X</Text>
+          </TouchableOpacity>
+        </View>
+
+        <MapView
+          style={styles.map}
+          initialRegion={initialRegion}
+          onPress={(e) => setSelectedLocation(e.nativeEvent.coordinate)}
+        >
+          {selectedLocation && <Marker coordinate={selectedLocation} />}
+        </MapView>
+
+        <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmLocation}>
+          <Text style={styles.confirmButtonText}>Confirm Location</Text>
+        </TouchableOpacity>
+      </>
+    )}
+  </View>
+</Modal> */}
+<Modal visible={mapModalVisible} animationType="slide" transparent={true}>
+  <View style={styles.modalContainer}>
+    {mapLoading && (
+      <View style={styles.loadingOverlay}>
+        <ActivityIndicator style={styles.loader} size="large" color="#aa18ea" />
+      </View>
+    )}
+
+    {!mapLoading && (
+      <>
+        <View style={styles.mapHeader}>
+          <TextInput
+            style={styles.searchBar}
+            placeholder="Search location"
+            value={searchQuery}
+            onChangeText={handleSearch}
+          />
+          <TouchableOpacity onPress={handleCloseModal} style={styles.closeButton}>
+            <Text style={styles.closeButtonText}>X</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Render search results */}
+        {searchResults.length > 0 && (
+          <ScrollView style={styles.searchResultsContainer}>
+            {searchResults.map((result, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.searchResult}
+                onPress={() => handleSelectLocation(result)}
+              >
+                <Text>{result.display_name}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        )}
+
+        <MapView
+          style={styles.map}
+          initialRegion={initialRegion}
+          onPress={(e) => setSelectedLocation(e.nativeEvent.coordinate)}
+        >
+          {selectedLocation && <Marker coordinate={selectedLocation} />}
+        </MapView>
+
+        <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmLocation}>
+          <Text style={styles.confirmButtonText}>Confirm Location</Text>
+        </TouchableOpacity>
+      </>
+    )}
+  </View>
+</Modal>
+
+
 
     </ScrollView>
   );
@@ -890,6 +982,24 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#f5f5f5',
   },
+  searchResultsContainer: {
+    position: 'absolute',
+    top: 100, // Adjust this based on your design
+    left: 20,
+    right: 20,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    maxHeight: 200,
+    zIndex: 2,
+  },
+  searchResult: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  searchResultText: {
+    fontSize: 16,
+  },
   loader: {
     position: 'absolute',
     top: '50%',
@@ -900,6 +1010,7 @@ const styles = StyleSheet.create({
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    // backgroundColor : 'grey',
     justifyContent: 'center',
     alignItems: 'center',
   },

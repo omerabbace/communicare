@@ -26,14 +26,18 @@ import RequestDetailsScreen from "../../screens/generalUser/RequestVehicleDetail
 import RequestWaitingScreen from "../../screens/generalUser/RequestWaiting";
 import ServiceProviderDetailsScreen from "../../screens/generalUser/ServiceProVehicleDetail";
 import PaymentScreen from "../../screens/generalUser/VehiclePayment";
+// import Notifications from "../../components/Notifications";
+import Notifications, { NotificationContext } from "../../components/Notifications";
 const Drawer = createDrawerNavigator();
 function GeneralDrawer({ navigation }) {
   const { userSession } = useContext(AuthContext);
   const [fullName, setFullName] = useState(userSession.name);
   const [profilePhoto, setProfilePhoto] = useState(userSession.profilePhoto);
   const fontFamily = Platform.OS === "ios" ? "Arial" : "Roboto";
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
 
   return (
+    <NotificationContext.Provider value={{ setHasUnreadNotifications }}>
     <Drawer.Navigator
       drawerContent={(props) => (
         <CustomDrawer {...props} profilePhoto={profilePhoto} fullName={fullName} />
@@ -75,6 +79,29 @@ function GeneralDrawer({ navigation }) {
             setFullName={setFullName}
             profilePhoto={profilePhoto}
             setProfilePhoto={setProfilePhoto}
+          />
+        )}
+      </Drawer.Screen>
+      <Drawer.Screen
+        name="Notifications"
+        options={{
+          drawerIcon: ({ color }) => (
+            <Ionicons
+              name={
+                hasUnreadNotifications
+                  ? "notifications"
+                  : "notifications-outline"
+              }
+              size={22}
+              color={color}
+            />
+          ),
+        }}
+      >
+        {(props) => (
+          <Notifications
+            {...props}
+            setHasUnreadNotifications={setHasUnreadNotifications}
           />
         )}
       </Drawer.Screen>
@@ -226,7 +253,9 @@ function GeneralDrawer({ navigation }) {
         }}
       />
     </Drawer.Navigator>
+    </NotificationContext.Provider>
   );
+  
 }
 
 export default GeneralDrawer;

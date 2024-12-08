@@ -155,17 +155,22 @@ import ServiceProviderAccidentList from "../../screens/Service_provider/ServiceP
 import VehicleIssuesList from "../../screens/Service_provider/VehicleIssuesList";
 import ReportDetailsScreen from "../../screens/Service_provider/VehicleReportDetails";
 import CompletedAccidentsScreen from "../../screens/Service_provider/CompletedAccidents";
-import Notifications from "../../components/Notifications";
+// import Notifications from "../../components/Notifications";
+import Notifications, { NotificationContext } from "../../components/Notifications";
+
 const Drawer = createDrawerNavigator();
 
 function ServiceProviderDrawer({ navigation }) {
   const { userSession } = useContext(AuthContext);
   const [fullName, setFullName] = useState(userSession.name);
   const [profilePhoto, setProfilePhoto] = useState(userSession.profilePhoto);
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
 
   const fontFamily = Platform.OS === "ios" ? "Arial" : "Roboto";
 
   return (
+    <NotificationContext.Provider value={{ setHasUnreadNotifications }}> 
+
     <Drawer.Navigator
       drawerContent={(props) => (
         <CustomServiceProviderDrawer
@@ -222,6 +227,29 @@ function ServiceProviderDrawer({ navigation }) {
           />
         )}
       </Drawer.Screen>
+      <Drawer.Screen
+        name="Notifications"
+        options={{
+          drawerIcon: ({ color }) => (
+            <Ionicons
+              name={
+                hasUnreadNotifications
+                  ? "notifications"
+                  : "notifications-outline"
+              }
+              size={22}
+              color={color}
+            />
+          ),
+        }}
+      >
+        {(props) => (
+          <Notifications
+            {...props}
+            setHasUnreadNotifications={setHasUnreadNotifications}
+          />
+        )}
+      </Drawer.Screen>
 
       {/* Conditional Screens Based on Role */}
       {userSession.serviceCategory === "vehicleAssistance" && (
@@ -242,17 +270,7 @@ function ServiceProviderDrawer({ navigation }) {
               drawerItemStyle: { display: "none" },
             }}
           />
-            <Drawer.Screen
-            name="Notifications"
-            component={Notifications}
-            options={{
-              drawerLabel: "Notifications",
-              drawerIcon: ({ color }) => (
-                <Ionicons name="notifications-outline" size={22} color={color} />
-              ),
-            }}
-          >
-          </Drawer.Screen>
+          
         </>
       )}
 
@@ -295,6 +313,7 @@ function ServiceProviderDrawer({ navigation }) {
         </>
       )}
     </Drawer.Navigator>
+    </NotificationContext.Provider>
   );
 }
 

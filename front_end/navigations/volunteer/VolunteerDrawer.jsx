@@ -239,18 +239,20 @@ import ViewAssignedSubTasksScreen from "../../screens/volunteer/ViewAssignedSubT
 import VolunteerSubTasksScreen from "../../screens/volunteer/VolunteerSubTasksScreen";
 import ReportTaskScreen from "../../screens/volunteer/ReportTaskScreen";
 import CompletedLeaderTasksScreen from "../../screens/volunteer/CompletedLeaderTasksScreen";
-
+import Notifications, { NotificationContext } from "../../components/Notifications";
 const Drawer = createDrawerNavigator();
 
 function VolunteerDrawer({ navigation }) {
   const { userSession, isLeader } = useContext(AuthContext);
   const [fullName, setFullName] = useState(userSession.name);
   const [profilePhoto, setProfilePhoto] = useState(userSession.profilePhoto);
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
 
   // Set platform-specific font family
   const fontFamily = Platform.OS === "ios" ? "Arial" : "Roboto";
 
   return (
+    <NotificationContext.Provider value={{ setHasUnreadNotifications }}> 
     <Drawer.Navigator
       drawerContent={(props) => (
         <CustomServiceProviderDrawer
@@ -303,7 +305,29 @@ function VolunteerDrawer({ navigation }) {
           />
         )}
       </Drawer.Screen>
-
+      <Drawer.Screen
+        name="Notifications"
+        options={{
+          drawerIcon: ({ color }) => (
+            <Ionicons
+              name={
+                hasUnreadNotifications
+                  ? "notifications"
+                  : "notifications-outline"
+              }
+              size={22}
+              color={color}
+            />
+          ),
+        }}
+      >
+        {(props) => (
+          <Notifications
+            {...props}
+            setHasUnreadNotifications={setHasUnreadNotifications}
+          />
+        )}
+      </Drawer.Screen>
       <Drawer.Screen
         name="Reported Issues"
         component={IssueListScreen}
@@ -419,6 +443,8 @@ function VolunteerDrawer({ navigation }) {
         }}
       />
     </Drawer.Navigator>
+    </NotificationContext.Provider>
+
   );
 }
 

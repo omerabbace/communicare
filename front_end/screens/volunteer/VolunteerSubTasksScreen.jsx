@@ -471,20 +471,29 @@ const VolunteerSubTasksScreen = ({ route }) => {
   // };
   const renderMedia = (uri) => {
     if (!uri) return null; // Return nothing if uri is null or undefined
-    const isVideo = uri.endsWith('.mp4') || uri.endsWith('.mov');
+  
+    // Construct full URI if it is a relative path
+    const fullUri = uri.startsWith('http') ? uri : `${BASE_URL}${uri}`;
+  
+    // Determine if the media is a video
+    const isVideo = fullUri.endsWith('.mp4') || fullUri.endsWith('.mov');
+  
+    // Render video or image based on media type
     if (isVideo) {
       return (
         <Video
-          source={{ uri }}
+          source={{ uri: fullUri }}
           style={styles.mediaPreview}
           useNativeControls
           resizeMode="cover"
+          shouldPlay={false} // Optional: prevent autoplay
         />
       );
     }
-    return <Image source={{ uri }} style={styles.mediaPreview} />;
-  };
   
+    // Render image for non-video media
+    return <Image source={{ uri: fullUri }} style={styles.mediaPreview} />;
+  };
 
   const handleReportSubmit = async () => {
     const token = await AsyncStorage.getItem('token');
@@ -596,15 +605,19 @@ const VolunteerSubTasksScreen = ({ route }) => {
         Date: {new Date(item.date).toLocaleString()}
       </Text>
       {item.media && item.media.length > 0 ? (
-        <FlatList
-          data={item.media}
-          horizontal
-          renderItem={({ item: mediaUri }) => renderMedia(mediaUri)}
-          keyExtractor={(mediaUri, index) => `${mediaUri}-${index}`}
-        />
-      ) : (
-        <Text style={styles.noMediaText}>No media attached</Text>
-      )}
+  <>
+    {console.log('Media array:', item.media)}
+    <FlatList
+      data={item.media}
+      horizontal
+      renderItem={({ item: mediaUri }) => renderMedia(mediaUri)}
+      keyExtractor={(mediaUri, index) => `${mediaUri}-${index}`}
+    />
+  </>
+) : (
+  <Text style={styles.noMediaText}>No media attached</Text>
+)}
+
     </View>
   );
   
