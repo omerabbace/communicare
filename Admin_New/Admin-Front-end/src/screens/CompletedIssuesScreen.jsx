@@ -255,6 +255,8 @@ const CompletedIssuesScreen = () => {
             rows={completedIssues}
             onViewDetails={handleOpenModal}
             onReport={handleOpenReportModal}
+            isCompleted={true} 
+            isCompletedScreen={true} 
           />
         ) : (
           <div className="no-issues-message">No completed issues at the moment.</div>
@@ -273,6 +275,7 @@ const CompletedIssuesScreen = () => {
                 issue={selectedIssue}
                 onClose={handleCloseReportModal}
                 onSubmit={handleSubmitReport}
+    
               />
             )}
           </div>
