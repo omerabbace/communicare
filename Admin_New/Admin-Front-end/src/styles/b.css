@@ -28,9 +28,24 @@
 .modal-content {
   flex-grow: 1;
   overflow-y: auto; /* Enable vertical scrolling */
-  padding-right: 15px; /* Add padding to prevent content from touching scrollbar */
-  margin-right: -15px; /* Align the padding */
+  position: absolute;
+  top: 50%; /* Center vertically */
+  left: 50%; /* Center horizontally */
+  transform: translate(-50%, -50%); /* Align center */
+  
+  /* Increase size */
+  width: 90vw; /* 90% of the viewport width */
+  max-width: 1200px; /* Maximum width */
+  height: 90vh; /* 90% of the viewport height */
+  max-height: 800px; /* Set maximum height for content */
+  max-width: 900px;
+  background: white;
+  border-radius: 12px; /* Smooth corners */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* More prominent shadow */
+  padding: 30px; /* More internal spacing */
+  box-sizing: border-box; /* Include padding in width/height */
 }
+
 
 .form-group {
   margin-bottom: 15px;
@@ -100,4 +115,26 @@
 #cancel:hover{
     background-color: red;
 
+}
+.issue-details-modal {
+  width: 80%;
+  max-width: 700px;
+  margin: auto;
+  background-color: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+.close-button {
+  cursor: pointer;
+  font-size: 1.8rem;
+  color: #555;
+  transition: color 0.3s ease;
+}
+.close-button:hover {
+  color: #000;
 }

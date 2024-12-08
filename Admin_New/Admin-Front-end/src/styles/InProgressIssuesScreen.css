@@ -42,17 +42,26 @@
   }
   
   .modal-content {
+    flex-grow: 1;
+    overflow-y: auto; /* Enable vertical scrolling */
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Align center */
+    
+    /* Increase size */
+    width: 90vw; /* 90% of the viewport width */
+    max-width: 1200px; /* Maximum width */
+    height: 90vh; /* 90% of the viewport height */
+    max-height: 800px; /* Set maximum height for content */
+    max-width: 900px;
     background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    padding: 20px;
-    width: 90%;
-    max-width: 500px;
+    border-radius: 12px; /* Smooth corners */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* More prominent shadow */
+    padding: 30px; /* More internal spacing */
+    box-sizing: border-box; /* Include padding in width/height */
   }
+  
   
   @media (max-width: 768px) {
     .Header h1 {
