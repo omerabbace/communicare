@@ -5,6 +5,8 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const ServicePayment = require('../model/ServicePayment');
 const asyncHandler = require('../utilities/CatchAsync');
 const AppError = require('../utilities/AppError');
+const Notification = require('../model/Notification'); 
+const { db } = require('../firebase'); // Firebase Admin database
 
 // Create a Service Payment
 exports.createServicePayment = asyncHandler(async (req, res, next) => {
@@ -60,26 +62,84 @@ exports.getServicePayments = asyncHandler(async (req, res, next) => {
     });
 });
 // Complete Payment
+// exports.completePayment = asyncHandler(async (req, res, next) => {
+//     const { requestId, paymentMethod, amount, status } = req.body;
+
+//     const paymentRecord = await ServicePayment.findOne({ userId: requestId });
+
+//     if (!paymentRecord) {
+//         return next(new AppError('Payment record not found', 404));
+//     }
+
+//     paymentRecord.status = status;
+//     paymentRecord.paymentMethod = paymentMethod;
+//     paymentRecord.completedAt = new Date();
+
+//     await paymentRecord.save();
+
+//     res.status(200).json({
+//         status: 'success',
+//         message: 'Payment completed successfully',
+//         data: paymentRecord,
+//     });
+// });
+
+
 exports.completePayment = asyncHandler(async (req, res, next) => {
-    const { requestId, paymentMethod, amount, status } = req.body;
 
-    const paymentRecord = await ServicePayment.findOne({ userId: requestId });
+    const {requestId, paymentId, paymentMethod, amount, status } = req.body; 
+    console.log('Backend Payload:', req.body);
 
-    if (!paymentRecord) {
-        return next(new AppError('Payment record not found', 404));
+    try {
+        // Fetch payment record by its _id
+        const paymentRecord = await ServicePayment.findById(paymentId);
+        if (!paymentRecord) {
+            return next(new AppError('Payment record not found', 404));
+        }
+
+        // Fetch confirmRegNo and serviceProviderId from Firebase using requestId (if stored)
+        const snapshot = await db.ref(`vehicle_assistance/${requestId}`).once("value");
+        const request = snapshot.val();
+        console.log("requesttt" , request);
+        if (!request) {
+            return next(new AppError('Vehicle assistance request not found in Firebase', 404));
+        }
+
+        const confirmRegNo = request.confirmRegNo || 'Unknown'; // Default value if not present
+        const serviceProviderId = request.serviceProviderId; // Fetch serviceProviderId from Firebase
+
+        if (!serviceProviderId) {
+            return next(new AppError('Service provider not assigned to this request', 400));
+        }
+
+        // Update the payment record details
+        paymentRecord.status = status;
+        paymentRecord.paymentMethod = paymentMethod;
+        paymentRecord.completedAt = new Date();
+        await paymentRecord.save();
+
+        // Notify the service provider about payment completion
+        await Notification.create({
+            userId: serviceProviderId, // Notify the service provider
+            title: "Payment Completed",
+            body: `A payment of ${amount} with registration number "${confirmRegNo}" using "${paymentMethod}" has been completed successfully by the user.`,
+            isRead: false, // Mark as unread by default
+            createdAt: new Date(),
+        });
+
+        // Respond to the client with success
+        res.status(200).json({
+            status: 'success',
+            message: 'Payment completed successfully',
+            data: paymentRecord,
+        });
+    } catch (error) {
+        console.error('Error in completePayment:', error);
+        res.status(500).json({
+            status: 'error',
+            message: 'Failed to complete payment',
+        });
     }
-
-    paymentRecord.status = status;
-    paymentRecord.paymentMethod = paymentMethod;
-    paymentRecord.completedAt = new Date();
-
-    await paymentRecord.save();
-
-    res.status(200).json({
-        status: 'success',
-        message: 'Payment completed successfully',
-        data: paymentRecord,
-    });
 });
 
 

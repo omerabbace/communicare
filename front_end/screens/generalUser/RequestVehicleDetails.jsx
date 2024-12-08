@@ -26,7 +26,7 @@ const RequestDetailsScreen = ({ navigation, route }) => {
     <View style={styles.container}>
       <Text style={styles.title}>Issue Details</Text>
       <Text style={styles.description}>{description}</Text>
-      <Text style={styles.price}>Price: ${price}</Text>
+      <Text style={styles.price}>Price: {price}</Text>
       <TouchableOpacity style={styles.acceptButton} onPress={handleAcceptRequest} disabled={loading}>
         <Text style={styles.acceptButtonText}>Accept Request</Text>
       </TouchableOpacity>

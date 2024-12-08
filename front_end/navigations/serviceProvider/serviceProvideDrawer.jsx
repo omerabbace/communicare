@@ -155,7 +155,7 @@ import ServiceProviderAccidentList from "../../screens/Service_provider/ServiceP
 import VehicleIssuesList from "../../screens/Service_provider/VehicleIssuesList";
 import ReportDetailsScreen from "../../screens/Service_provider/VehicleReportDetails";
 import CompletedAccidentsScreen from "../../screens/Service_provider/CompletedAccidents";
-
+import Notifications from "../../components/Notifications";
 const Drawer = createDrawerNavigator();
 
 function ServiceProviderDrawer({ navigation }) {
@@ -242,6 +242,17 @@ function ServiceProviderDrawer({ navigation }) {
               drawerItemStyle: { display: "none" },
             }}
           />
+            <Drawer.Screen
+            name="Notifications"
+            component={Notifications}
+            options={{
+              drawerLabel: "Notifications",
+              drawerIcon: ({ color }) => (
+                <Ionicons name="notifications-outline" size={22} color={color} />
+              ),
+            }}
+          >
+          </Drawer.Screen>
         </>
       )}
 
