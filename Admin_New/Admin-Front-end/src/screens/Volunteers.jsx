@@ -229,11 +229,16 @@ const Volunteers = () => {
         <UserTable rows={filteredVolunteers} onEdit={handleEdit} onDelete={handleDelete} />
 
         {/* Modal Section */}
-        <Modal open={isModalOpen} onClose={handleCloseModal}>
+        {/* <Modal open={isModalOpen} onClose={handleCloseModal}>
           <div>
             {selectedVolunteer && (
               <EditVolunteerForm user={selectedVolunteer} onClose={handleCloseModal} />
             )}
+          </div>
+        </Modal> */}
+                 <Modal open={isModalOpen} onClose={handleCloseModal}>
+          <div className="modal-content">
+            <EditVolunteerForm user={selectedVolunteer} onClose={handleCloseModal} />
           </div>
         </Modal>
       </div>

@@ -227,10 +227,10 @@ const EditServiceProviderForm = ({ user, onClose }) => {
                         </div>
                     </div>
                     <div className="form-row button-container-edit">
-                        <button type="submit" className="save-button">
+                        <button type="submit" className="save-button-edit">
                             Save
                         </button>
-                        <button type="button" className="cancel-button" onClick={onClose}>
+                        <button type="button" className="cancel-button-edit" onClick={onClose}>
                             Cancel
                         </button>
                     </div>

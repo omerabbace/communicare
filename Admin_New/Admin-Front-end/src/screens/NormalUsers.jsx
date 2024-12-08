@@ -251,11 +251,17 @@ const NormalUsers = () => {
         <UserTable rows={filteredUsers} onEdit={handleEdit} onDelete={handleDelete} />
   
         {/* Modal for Editing User */}
-        <Modal open={isModalOpen} onClose={handleCloseModal}>
+        {/* <Modal open={isModalOpen} onClose={handleCloseModal}>
           <div>
             {selectedUser && (
               <EditUserForm user={selectedUser} onClose={handleCloseModal} />
             )}
+          </div>
+        </Modal> */}
+         {/* Modal for Editing User */}
+         <Modal open={isModalOpen} onClose={handleCloseModal}>
+          <div className="modal-content">
+            <EditUserForm user={selectedUser} onClose={handleCloseModal} />
           </div>
         </Modal>
       </div>

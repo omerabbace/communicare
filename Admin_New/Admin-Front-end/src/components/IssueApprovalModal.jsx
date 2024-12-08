@@ -35,7 +35,7 @@ const ApproveModal = ({ issue, onClose, onAssignTask }) => {
             </div>
   
             <div className="form-group">
-              <label>Number of Volunteers Required:</label>
+              <label>Volunteers Required:</label>
               <input
                 type="number"
                 min="1"

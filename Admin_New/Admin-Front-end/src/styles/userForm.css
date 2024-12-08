@@ -4,7 +4,9 @@
     height: 100vh;
     width: 100vw;
     overflow-x: hidden;
-    background-color: #dcd7d7;
+    background-color: white;
+    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
+
   }
   
   .content {
@@ -35,9 +37,20 @@
   /* Form */
   .user-form {
     background-color: white;
+    padding: 30px;
     border-radius: 8px;
-    padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    
+    /* Center the form within its container */
+  
+    
+    /* Adjust width and height to ensure proper scaling */
+    width: 180%; /* Adjust the width to make the form more centered */
+    max-width: 800px; /* Maximum width to prevent overflow */
+    /* min-height: 400px; Ensure the form has a minimum height */
+    height: auto; /* Allow the form to expand depending on content */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    margin: auto; /* Automatically center the form horizontally and vertically */
   }
   
   .form-row {
@@ -71,7 +84,7 @@
     justify-content: flex-end;
   }
   
-  .submit-button {
+  .submit-button-edit {
     background-color: #198754;
     color: white;
     padding: 10px 20px;
@@ -79,6 +92,7 @@
     border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
+    size: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -87,4 +101,30 @@
   .submit-button:hover {
     background-color: #198754;
   }
-  
+  .cancel-button-edit{
+    background-color: red;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+  }
+  .save-button-edit{
+    background-color: #198754;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
