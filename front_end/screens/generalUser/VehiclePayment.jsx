@@ -363,7 +363,7 @@ const PaymentScreen = ({ route, navigation }) => {
   const [cardDetails, setCardDetails] = useState();
   const [dialogVisible, setDialogVisible] = useState(false); // Sweet Alert visibility state
   const [paymentMethod, setPaymentMethod] = useState(null); // To store the selected payment method
-
+  const [paymentId, setPaymentId] = useState(null);
   // Show Sweet Alert for confirmation
   const showConfirmationDialog = (method) => {
     setPaymentMethod(method);
@@ -380,11 +380,24 @@ const PaymentScreen = ({ route, navigation }) => {
   };
 
   // Handle cash payment
+  // const handleCashPayment = async () => {
+  //   try {
+  //     setLoading(true);
+  //     await fetchPaymentIntentClientSecret('cash'); // Notify backend
+  //     Alert.alert('Payment Success', `Paid ${price} in cash.`);
+  //     completePayment();
+  //   } catch (error) {
+  //     Alert.alert('Error', 'Failed to process cash payment.');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const handleCashPayment = async () => {
     try {
       setLoading(true);
-      await fetchPaymentIntentClientSecret('cash'); // Notify backend
-      Alert.alert('Payment Success', `Paid $${price} in cash.`);
+      const { paymentId } = await fetchPaymentIntentClientSecret('cash'); // Notify backend
+      Alert.alert('Payment Success', `Paid ${price} in cash.`);
+      await notifyBackend('cash', paymentId);
       completePayment();
     } catch (error) {
       Alert.alert('Error', 'Failed to process cash payment.');
@@ -392,6 +405,7 @@ const PaymentScreen = ({ route, navigation }) => {
       setLoading(false);
     }
   };
+  
 
   // Fetch client secret from backend for card payment
   const fetchPaymentIntentClientSecret = async (method) => {
@@ -407,7 +421,14 @@ const PaymentScreen = ({ route, navigation }) => {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      return response.data.clientSecret;
+      setPaymentId(response.data.paymentId);
+      // console.log("responsee", response.data);
+      
+      // return response.data.clientSecret;
+      return {
+        clientSecret: response.data.clientSecret,
+        paymentId: response.data.paymentId,
+      };
     } catch (error) {
       console.error('Error fetching payment intent:', error);
       Alert.alert('Error', 'Unable to initiate payment. Please try again.');
@@ -415,6 +436,40 @@ const PaymentScreen = ({ route, navigation }) => {
   };
 
   // Handle card payment through Stripe
+  // const handleCardPayment = async () => {
+  //   if (!cardDetails?.complete) {
+  //     Alert.alert('Error', 'Please complete the card details.');
+  //     return;
+  //   }
+  //   setLoading(true);
+  //   try {
+  //     const clientSecret = await fetchPaymentIntentClientSecret('card');
+  //     if (!clientSecret) throw new Error('Payment Intent client secret not found');
+
+  //     const { paymentIntent, error } = await confirmPayment(clientSecret, {
+  //       paymentMethodType: 'Card',
+  //       paymentMethodData: {
+  //         billingDetails: {
+  //           email: userSession.email,
+  //         },
+  //       },
+  //     });
+
+  //     if (error) {
+  //       console.error('Payment Confirmation Error:', error);
+  //       Alert.alert('Payment Error', error.message || 'Failed to confirm payment.');
+  //     } else if (paymentIntent) {
+  //       Alert.alert('Payment Success', `Paid $${price} via card.`);
+  //       await notifyBackend('card');
+  //       completePayment();
+  //     }
+  //   } catch (error) {
+  //     console.error('Error during card payment:', error);
+  //     Alert.alert('Error', 'Failed to complete the payment.');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const handleCardPayment = async () => {
     if (!cardDetails?.complete) {
       Alert.alert('Error', 'Please complete the card details.');
@@ -422,9 +477,9 @@ const PaymentScreen = ({ route, navigation }) => {
     }
     setLoading(true);
     try {
-      const clientSecret = await fetchPaymentIntentClientSecret('card');
-      if (!clientSecret) throw new Error('Payment Intent client secret not found');
-
+      const { clientSecret, paymentId } = await fetchPaymentIntentClientSecret('card');
+      if (!clientSecret || !paymentId) throw new Error('Payment Intent or Payment ID not found');
+  
       const { paymentIntent, error } = await confirmPayment(clientSecret, {
         paymentMethodType: 'Card',
         paymentMethodData: {
@@ -433,13 +488,13 @@ const PaymentScreen = ({ route, navigation }) => {
           },
         },
       });
-
+  
       if (error) {
         console.error('Payment Confirmation Error:', error);
         Alert.alert('Payment Error', error.message || 'Failed to confirm payment.');
       } else if (paymentIntent) {
-        Alert.alert('Payment Success', `Paid $${price} via card.`);
-        await notifyBackend('card');
+        Alert.alert('Payment Success', `Paid ${price} via card.`);
+        await notifyBackend('card', paymentId);
         completePayment();
       }
     } catch (error) {
@@ -449,15 +504,54 @@ const PaymentScreen = ({ route, navigation }) => {
       setLoading(false);
     }
   };
+  
 
   // Notify the backend about successful payment
-  const notifyBackend = async (method) => {
+  // const notifyBackend = async (method) => {
+  //   try {
+  //     console.log('Frontend Payload:', {
+  //       paymentId,
+  //       paymentMethod: method,
+  //       amount: price,
+  //       status: 'completed',
+  //     });
+      
+  //     const token = await AsyncStorage.getItem('token');
+  //     await axios.post(
+  //       `${BASE_URL}/api/payments/complete-payment`,
+  //       {
+  //         paymentId,
+  //         paymentMethod: method,
+  //         amount: price,
+  //         status: 'completed',
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+  //   } catch (error) {
+  //     console.error('Error notifying backend:', error);
+  //     Alert.alert('Error', 'Failed to update payment status on server.');
+  //   }
+  // };
+
+  const notifyBackend = async (method, paymentId) => {
     try {
+      console.log('Frontend Payload:', {
+        paymentId,
+        paymentMethod: method,
+        amount: price,
+        status: 'completed',
+      });
+  
       const token = await AsyncStorage.getItem('token');
       await axios.post(
         `${BASE_URL}/api/payments/complete-payment`,
         {
-          requestId: userSession._id,
+          requestId,
+          paymentId,
           paymentMethod: method,
           amount: price,
           status: 'completed',
@@ -473,7 +567,7 @@ const PaymentScreen = ({ route, navigation }) => {
       Alert.alert('Error', 'Failed to update payment status on server.');
     }
   };
-
+  
   // Complete the payment process and clear persistent data
   const completePayment = async () => {
     try {
@@ -489,7 +583,7 @@ const PaymentScreen = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Choose Payment Method</Text>
-      <Text style={styles.price}>Amount: ${price}</Text>
+      <Text style={styles.price}>Amount: {price}</Text>
 
       <TouchableOpacity
         style={styles.paymentButton}

@@ -303,7 +303,7 @@ useEffect(() => {
         <ActivityIndicator size="large" color="#aa18ea" style={styles.loader} />
       ) : price ? (
         <View style={styles.priceCard}>
-          <Text style={styles.priceText}>Repair Price: ${price}</Text>
+          <Text style={styles.priceText}>Repair Price: {price}</Text>
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.acceptButton} onPress={acceptPrice}>
               <Text style={styles.buttonText}>Accept Price</Text>

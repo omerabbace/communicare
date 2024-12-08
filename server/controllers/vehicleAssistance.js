@@ -103,6 +103,7 @@ const asyncHandler = require('../utilities/CatchAsync');
 const AppError = require('../utilities/AppError');
 const User = require('../model/User');
 const { db } = require('../firebase'); // Firebase Admin database
+const Notification = require('../model/Notification');
 
 // Report Vehicle Issue
 const reportVehicleIssue = asyncHandler(async (req, res) => {
@@ -200,66 +201,141 @@ const getVehicleReports = asyncHandler(async (req, res) => {
 //     }
 // });
 
+// const selectVehicleReport = asyncHandler(async (req, res) => {
+//     const { requestId } = req.params;
+//     const { serviceProviderId } = req.body;
+
+//     try {
+//         // Check if the service provider already has an active request
+//         const snapshot = await db.ref("vehicle_assistance").once("value");
+//         const reports = snapshot.val();
+
+//         const activeRequest = Object.entries(reports || {}).find(([key, value]) => 
+//             value.serviceProviderId === serviceProviderId && 
+//             value.status !== "completed" &&
+//             value.status !== "canceled"  &&
+//             value.status !== "pending" 
+//         );
+//         console.log("Active Request:", activeRequest);
+
+//         if (activeRequest) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: 'You already have an active request. Complete it before accepting a new one.',
+//             });
+//         }
+
+//         // Fetch the current request to ensure it is "pending"
+//         const requestSnapshot = await db.ref(`vehicle_assistance/${requestId}`).once("value");
+//         const request = requestSnapshot.val();
+
+//         if (!request) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: "Request not found",
+//             });
+//         }
+
+//         if (request.status !== "pending") {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: "This request is no longer available for acceptance.",
+//             });
+//         }
+
+//         // Update the request to "accepted" and assign the service provider
+//         await db.ref(`vehicle_assistance/${requestId}`).update({
+//             status: "accepted",
+//             serviceProviderId,
+//         });
+
+//         res.status(200).json({
+//             success: true,
+//             message: "Request accepted successfully",
+//         });
+//     } catch (error) {
+//         console.error("Error in restrictToOneRequest:", error);
+//         res.status(500).json({
+//             success: false,
+//             message: "Failed to accept request",
+//         });
+//     }
+// });
+
 const selectVehicleReport = asyncHandler(async (req, res) => {
-    const { requestId } = req.params;
-    const { serviceProviderId } = req.body;
+  const { requestId } = req.params;
+  const { serviceProviderId } = req.body;
 
-    try {
-        // Check if the service provider already has an active request
-        const snapshot = await db.ref("vehicle_assistance").once("value");
-        const reports = snapshot.val();
+  try {
+    // Check if the service provider already has an active request
+    const snapshot = await db.ref("vehicle_assistance").once("value");
+    const reports = snapshot.val();
 
-        const activeRequest = Object.entries(reports || {}).find(([key, value]) => 
-            value.serviceProviderId === serviceProviderId && 
-            value.status !== "completed" &&
-            value.status !== "canceled"  &&
-            value.status !== "pending" 
-        );
-        console.log("Active Request:", activeRequest);
+    const activeRequest = Object.entries(reports || {}).find(
+      ([key, value]) =>
+        value.serviceProviderId === serviceProviderId &&
+        value.status !== "completed" &&
+        value.status !== "canceled" &&
+        value.status !== "pending"
+    );
+    console.log("Active Request:", activeRequest);
 
-        if (activeRequest) {
-            return res.status(400).json({
-                success: false,
-                message: 'You already have an active request. Complete it before accepting a new one.',
-            });
-        }
-
-        // Fetch the current request to ensure it is "pending"
-        const requestSnapshot = await db.ref(`vehicle_assistance/${requestId}`).once("value");
-        const request = requestSnapshot.val();
-
-        if (!request) {
-            return res.status(404).json({
-                success: false,
-                message: "Request not found",
-            });
-        }
-
-        if (request.status !== "pending") {
-            return res.status(400).json({
-                success: false,
-                message: "This request is no longer available for acceptance.",
-            });
-        }
-
-        // Update the request to "accepted" and assign the service provider
-        await db.ref(`vehicle_assistance/${requestId}`).update({
-            status: "accepted",
-            serviceProviderId,
-        });
-
-        res.status(200).json({
-            success: true,
-            message: "Request accepted successfully",
-        });
-    } catch (error) {
-        console.error("Error in restrictToOneRequest:", error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to accept request",
-        });
+    if (activeRequest) {
+      return res.status(400).json({
+        success: false,
+        message: "You already have an active request. Complete it before accepting a new one.",
+      });
     }
+
+    // Fetch the current request to ensure it is "pending"
+    const requestSnapshot = await db.ref(`vehicle_assistance/${requestId}`).once("value");
+    const request = requestSnapshot.val();
+
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: "Request not found",
+      });
+    }
+
+    if (request.status !== "pending") {
+      return res.status(400).json({
+        success: false,
+        message: "This request is no longer available for acceptance.",
+      });
+    }
+
+    // Update the request to "accepted" and assign the service provider
+    await db.ref(`vehicle_assistance/${requestId}`).update({
+      status: "accepted",
+      serviceProviderId,
+    });
+
+    // Create an in-app notification for the user who reported the vehicle assistance request
+    if (request.userId) {
+      await Notification.create({
+        userId: request.userId, // Assuming `userId` is stored in the request object
+        title: "Request Accepted",
+        body: `Your vehicle assistance request has been accepted by a service provider.`,
+        isRead: false, // Mark as unread
+        createdAt: new Date(),
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Request accepted successfully",
+    });
+  } catch (error) {
+    console.error("Error in selectVehicleReport:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to accept request",
+    });
+  }
 });
+
+
 
 // Check if the service provider has an active request
 const checkActiveRequest = asyncHandler(async (req, res) => {
@@ -354,33 +430,74 @@ const getRequestDetails = asyncHandler(async (req, res) => {
 
 
 
+// const cancelVehicleRequest = asyncHandler(async (req, res) => {
+//     const { requestId } = req.params;
+
+//     try {
+//         // Check if the request exists
+//         const snapshot = await db.ref(`vehicle_assistance/${requestId}`).once("value");
+//         const request = snapshot.val();
+
+//         if (!request) {
+//             return res.status(404).json({ success: false, message: 'Request not found' });
+//         }
+
+//         // Update the status to "canceled" and set userCanceled to true
+//         await db.ref(`vehicle_assistance/${requestId}`).update({
+//             status: "canceled",
+//             userCanceled: true,
+//         });
+
+//         res.status(200).json({
+//             success: true,
+//             message: 'Vehicle request canceled successfully',
+//         });
+//     } catch (error) {
+//         console.error('Error in cancelVehicleRequest:', error);
+//         res.status(500).json({ success: false, message: 'Failed to cancel vehicle request' });
+//     }
+// });
+
+
 const cancelVehicleRequest = asyncHandler(async (req, res) => {
-    const { requestId } = req.params;
+  const { requestId } = req.params;
 
-    try {
-        // Check if the request exists
-        const snapshot = await db.ref(`vehicle_assistance/${requestId}`).once("value");
-        const request = snapshot.val();
+  try {
+    // Check if the request exists
+    const snapshot = await db.ref(`vehicle_assistance/${requestId}`).once("value");
+    const request = snapshot.val();
 
-        if (!request) {
-            return res.status(404).json({ success: false, message: 'Request not found' });
-        }
-
-        // Update the status to "canceled" and set userCanceled to true
-        await db.ref(`vehicle_assistance/${requestId}`).update({
-            status: "canceled",
-            userCanceled: true,
-        });
-
-        res.status(200).json({
-            success: true,
-            message: 'Vehicle request canceled successfully',
-        });
-    } catch (error) {
-        console.error('Error in cancelVehicleRequest:', error);
-        res.status(500).json({ success: false, message: 'Failed to cancel vehicle request' });
+    if (!request) {
+      return res.status(404).json({ success: false, message: 'Request not found' });
     }
+
+    // Update the status to "canceled" and set userCanceled to true
+    await db.ref(`vehicle_assistance/${requestId}`).update({
+      status: "canceled",
+      userCanceled: true,
+    });
+
+    // Create an in-app notification for the service provider (if assigned)
+    if (request.serviceProviderId) {
+      await Notification.create({
+        userId: request.serviceProviderId, // Notify the service provider
+        title: "Request Canceled",
+        body: `The vehicle assistance request "${request.confirmRegNo}" has been canceled by the user.`,
+        isRead: false, // Mark as unread by default
+        createdAt: new Date(),
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Vehicle request canceled successfully',
+    });
+  } catch (error) {
+    console.error('Error in cancelVehicleRequest:', error);
+    res.status(500).json({ success: false, message: 'Failed to cancel vehicle request' });
+  }
 });
+
 
 
 // Set Price for Repair (Service Provider)
@@ -415,48 +532,114 @@ const setRepairPrice = asyncHandler(async (req, res) => {
 });
 
 // Accept Price (User)
-// Accept Price (User)
-const acceptRepairPrice = asyncHandler(async (req, res) => {
-    const { requestId } = req.params;
+// // Accept Price (User)
+// const acceptRepairPrice = asyncHandler(async (req, res) => {
+//     const { requestId } = req.params;
 
+//     const snapshot = await db.ref(`vehicle_assistance/${requestId}`).once("value");
+//     const request = snapshot.val();
+
+//     if (!request) {
+//         return res.status(404).json({ success: false, message: 'Request not found' });
+//     }
+
+//     if (request.userCanceled) {
+//         return res.status(400).json({
+//             success: false,
+//             message: 'Cannot accept the price as the request has been canceled by the user',
+//         });
+//     }
+
+//     if (!request.price) {
+//         return res.status(400).json({
+//             success: false,
+//             message: 'No price has been set for this request',
+//         });
+//     }
+
+//     if (request.isPriceAccepted) {
+//         return res.status(400).json({
+//             success: false,
+//             message: 'Price has already been accepted by the user',
+//         });
+//     }
+
+//     await db.ref(`vehicle_assistance/${requestId}`).update({
+//         isPriceAccepted: true,
+//         status: "approved",
+//     });
+
+//     res.status(200).json({
+//         success: true,
+//         message: 'Repair price accepted. Work status set to in-progress.',
+//     });
+// });
+
+
+const acceptRepairPrice = asyncHandler(async (req, res) => {
+  const { requestId } = req.params;
+
+  try {
+    // Retrieve the request from Firebase
     const snapshot = await db.ref(`vehicle_assistance/${requestId}`).once("value");
     const request = snapshot.val();
 
     if (!request) {
-        return res.status(404).json({ success: false, message: 'Request not found' });
+      return res.status(404).json({ success: false, message: 'Request not found' });
     }
 
     if (request.userCanceled) {
-        return res.status(400).json({
-            success: false,
-            message: 'Cannot accept the price as the request has been canceled by the user',
-        });
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot accept the price as the request has been canceled by the user',
+      });
     }
 
     if (!request.price) {
-        return res.status(400).json({
-            success: false,
-            message: 'No price has been set for this request',
-        });
+      return res.status(400).json({
+        success: false,
+        message: 'No price has been set for this request',
+      });
     }
 
     if (request.isPriceAccepted) {
-        return res.status(400).json({
-            success: false,
-            message: 'Price has already been accepted by the user',
-        });
+      return res.status(400).json({
+        success: false,
+        message: 'Price has already been accepted by the user',
+      });
     }
 
+    // Update the request to indicate price acceptance
     await db.ref(`vehicle_assistance/${requestId}`).update({
-        isPriceAccepted: true,
-        status: "approved",
+      isPriceAccepted: true,
+      status: "approved",
     });
 
+    // Notify the service provider (if assigned) about the price acceptance
+    if (request.serviceProviderId) {
+      await Notification.create({
+        userId: request.serviceProviderId, // Notify the service provider
+        title: "Price Accepted",
+        body: `The repair price for request "${request.confirmRegNo}" has been accepted by the user. Work status is now approved.`,
+        isRead: false, // Mark as unread by default
+        createdAt: new Date(),
+      });
+    }
+
     res.status(200).json({
-        success: true,
-        message: 'Repair price accepted. Work status set to in-progress.',
+      success: true,
+      message: 'Repair price accepted. Work status set to approved.',
     });
+  } catch (error) {
+    console.error('Error in acceptRepairPrice:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to accept repair price',
+    });
+  }
 });
+
+
 
 
 // Start Work (Service Provider)
@@ -488,34 +671,87 @@ const startWork = asyncHandler(async (req, res) => {
 });
 
 
-// Complete Work (Service Provider)
-const completeWork = asyncHandler(async (req, res) => {
-    const { requestId } = req.params;
+// // Complete Work (Service Provider)
+// const completeWork = asyncHandler(async (req, res) => {
+//     const { requestId } = req.params;
 
+//     const snapshot = await db.ref(`vehicle_assistance/${requestId}`).once("value");
+//     const request = snapshot.val();
+
+//     if (!request) {
+//         return res.status(404).json({ success: false, message: 'Request not found' });
+//     }
+
+//     if (request.userCanceled) {
+//         return res.status(400).json({
+//             success: false,
+//             message: 'Cannot complete work as the request has been canceled by the user',
+//         });
+//     }
+
+//     await db.ref(`vehicle_assistance/${requestId}`).update({
+//         status: "completed",
+//         completedAt: Date.now(),
+//     });
+
+//     res.status(200).json({
+//         success: true,
+//         message: 'Work completed successfully',
+//     });
+// });
+
+
+
+const completeWork = asyncHandler(async (req, res) => {
+  const { requestId } = req.params;
+
+  try {
+    // Retrieve the request from Firebase
     const snapshot = await db.ref(`vehicle_assistance/${requestId}`).once("value");
     const request = snapshot.val();
 
     if (!request) {
-        return res.status(404).json({ success: false, message: 'Request not found' });
+      return res.status(404).json({ success: false, message: 'Request not found' });
     }
 
     if (request.userCanceled) {
-        return res.status(400).json({
-            success: false,
-            message: 'Cannot complete work as the request has been canceled by the user',
-        });
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot complete work as the request has been canceled by the user',
+      });
     }
 
+    // Update the request to "completed"
     await db.ref(`vehicle_assistance/${requestId}`).update({
-        status: "completed",
-        completedAt: Date.now(),
+      status: "completed",
+      completedAt: Date.now(),
     });
 
+    // Create an in-app notification for the user who reported the request
+    if (request.userId) {
+      await Notification.create({
+        userId: request.userId, // Notify the user who created the request
+        title: "Work Completed",
+        body: `The work for your vehicle assistance request "${request.confirmRegNo}" has been completed.`,
+        isRead: false, // Mark as unread by default
+        createdAt: new Date(),
+      });
+    }
+
     res.status(200).json({
-        success: true,
-        message: 'Work completed successfully',
+      success: true,
+      message: 'Work completed successfully',
     });
+  } catch (error) {
+    console.error('Error in completeWork:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to mark work as completed',
+    });
+  }
 });
+
+
 
 // Check if a specific request's status is accepted
 const checkRequestStatus = asyncHandler(async (req, res) => {
