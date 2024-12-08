@@ -1,0 +1,117 @@
+/* General container styling */
+.manage-profile-container {
+    display: flex;
+    width: 100vw; /* Full width of the viewport */
+    height: 100vh; /* Full height of the viewport */
+    font-family: 'Roboto', sans-serif;
+}
+  
+  /* Main content styling */
+  .main-content {
+    background: #ffffff; /* White background for the card */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle box shadow for depth */
+    border-radius: 8px;
+    padding: 20px;
+    width: 100%; /* Full-width card */
+    max-width: 600px; /* Restrict maximum width for better responsiveness */
+    margin: auto; /* Center the card */
+    box-sizing: border-box;
+  }
+  
+  /* Header styling */
+  .header h1 {
+    text-align: center;
+    color: #333; /* Darker text for better readability */
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+  }
+  
+  /* Profile form styling */
+  .profile-form-container {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+  }
+  
+  .profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Space between form groups */
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  label {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 5px;
+  }
+  
+  input {
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: border-color 0.2s;
+  }
+  
+  input:disabled {
+    background-color: #f0f0f0; /* Light gray background for disabled inputs */
+  }
+  
+  input:focus {
+    border-color: #007bff; /* Blue border on focus */
+    outline: none;
+  }
+  
+  /* Button styling */
+  .custom-button {
+    padding: 8px 15px; /* Smaller padding for smaller button */
+    font-size: 0.9rem;
+    background-color: #007bff; /* Blue background */
+    color: white; /* White text */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .custom-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+  }
+  
+  .custom-button:disabled {
+    background-color: #cccccc; /* Gray background for disabled state */
+    cursor: not-allowed;
+  }
+  
+  /* Success and error messages */
+  .success-message {
+    color: #28a745; /* Green for success */
+    font-size: 0.9rem;
+    margin-top: 10px;
+    text-align: center;
+  }
+  
+  .error-message {
+    color: #dc3545; /* Red for error */
+    font-size: 0.9rem;
+    margin-top: 10px;
+    text-align: center;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .main-content {
+      padding: 15px;
+    }
+  
+    .custom-button {
+      font-size: 0.8rem;
+      padding: 6px 10px;
+    }
+  }
+  

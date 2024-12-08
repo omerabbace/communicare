@@ -1,39 +1,47 @@
 /* General Page Styling */
-
 .default-page {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center; /* Center vertically */
     align-items: center;
-    height: 100vh; 
+    min-height: 100vh; /* Ensure full viewport height */
     padding: 20px;
     background-color: #f5f5f5;
     text-align: center;
 }
 
+.content-wrapper {  /* New wrapper for vertical centering */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Distribute space between elements */
+    align-items: center;
+    width: 100%;
+    max-width: 800px; /* Limit width on larger screens */
+    margin: 0 auto; /* Center horizontally */
+ }
+
+
 /* Image Container */
 .image-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    width: 100%;
     margin-bottom: 20px;
-    flex-grow: 1;
 }
 
 .center-image {
-    max-width: 100%; 
+    width: 100%;
+    max-width: 500px;  /* Limit image width */
     height: auto;
-    max-height: 450px; 
+    display: block; /* Prevents margin collapse */
+    margin: 0 auto; /* Center horizontally */
 }
 
 /* Welcome Message Styling */
 .welcome-box {
-    flex-grow: 1; 
     margin-bottom: 20px;
 }
 
 .welcome-box h1 {
-    font-size: 1.5em;
+    font-size: 2em; /* Larger default font size */
     color: #333;
     margin: 0;
 }
@@ -42,39 +50,51 @@
 .button-container {
     display: flex;
     justify-content: center;
-    gap: 15px; 
-    margin-bottom: 40px;
-    flex-grow: 0;
+    gap: 15px;
+    margin-bottom: 20px; /* Reduced bottom margin */
 }
+
 
 /* Button Styling */
 .custom-button {
-    background-color: #aa18ea; 
-    color:white;
-    padding: 10px 20px;
+    background-color: #aa18ea;
+    color: white;
+    padding: 12px 24px; /* Increased padding */
     border: none;
     border-radius: 5px;
-    font-size: 1.2em;
+    font-size: 1.1em; /* Slightly larger font size */
     cursor: pointer;
     transition: background-color 0.3s ease;
-    width: 110px;
 }
 
 .custom-button:hover {
-    background-color: #900ec4; /* Darker shade on hover */
+    background-color: #900ec4;
 }
 
-@media (max-width: 600px) {
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
     .welcome-box h1 {
-        font-size: 2em;
+        font-size: 1.8em;
     }
-
     .custom-button {
         font-size: 1em;
-        padding: 8px 16px;
+        padding: 10px 20px; /* Adjust padding */
     }
 
     .center-image {
-        max-height: 200px;
+        max-width: 90%; /* Image takes up more relative width */
+
+    }
+
+}
+
+
+@media (max-width: 480px) {
+    .welcome-box h1 {
+        font-size: 1.5em;
+    }
+    .custom-button {
+        font-size: 0.9em;
+        padding: 8px 16px;
     }
 }

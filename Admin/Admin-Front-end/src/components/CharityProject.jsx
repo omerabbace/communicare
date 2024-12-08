@@ -1,28 +1,28 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import Sidebar from './Sidebar';
-import '../styles/ManageProfile.css';
-import { BASE_URL } from '../config';
+import React, { useState } from "react";
+import axios from "axios";
+import Sidebar from "./Sidebar";
+import "../styles/ManageProfile.css";
+import { BASE_URL } from "../config";
 
 const CreateCharityProject = () => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [progress, setProgress] = useState('');
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [progress, setProgress] = useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setMessage('');
-    
+    setError("");
+    setMessage("");
+
     try {
-      const token = localStorage.getItem('token');
-    //   console.log(token);
-    //   console.log('title', title);
-    //   console.log('desc', description);
-    //   console.log('progress', progress);
+      const token = localStorage.getItem("token");
+      //   console.log(token);
+      //   console.log('title', title);
+      //   console.log('desc', description);
+      //   console.log('progress', progress);
 
       // Make API request to create charity project
       const response = await axios.post(
@@ -30,17 +30,17 @@ const CreateCharityProject = () => {
         { title, description, progress },
         {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
-      setMessage('Charity project created successfully!');
-      setTitle('');
-      setDescription('');
-      setProgress('');
+      setMessage("Charity project created successfully!");
+      setTitle("");
+      setDescription("");
+      setProgress("");
     } catch (err) {
-      setError('Failed to create charity project. Please try again.');
+      setError("Failed to create charity project. Please try again.");
     }
   };
 
@@ -85,7 +85,11 @@ const CreateCharityProject = () => {
               />
             </div>
 
-            <button type="submit" className="custom-button">Create Project</button>
+            <div className="button-container">
+              <button type="submit" className="custom-button-mp">
+                Create Project
+              </button>
+            </div>
 
             {message && <p className="success-message">{message}</p>}
             {error && <p className="error-message">{error}</p>}

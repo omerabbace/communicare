@@ -138,3 +138,32 @@ exports.getDonations = asyncHandler(async (req, res, next) => {
         data: donations
     });
 });
+
+exports.getDonationSummaries = asyncHandler(async (req, res, next) => {
+    try {
+        const donations = await Donation.find()
+            .populate({
+                path: 'projectId',
+                select: 'title' // Select only the title from the Project
+            })
+            .populate({
+                path: 'userId',
+                select: 'name' // Select only the name from the User, adjust if different field
+            });
+
+        res.status(200).json({
+            status: 'success',
+            results: donations.length,
+            data: donations
+        });
+
+
+    } catch (error) {
+        console.error("Error fetching donation summaries:", error); // Log the error for debugging
+        res.status(500).json({
+            status: 'error',
+            message: 'Internal Server Error', // Generic error message for security
+            error: error.message  // Include error message for development
+        });
+    }
+});

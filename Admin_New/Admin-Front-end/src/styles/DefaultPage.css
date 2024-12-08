@@ -1,0 +1,80 @@
+/* General Page Styling */
+
+.default-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    height: 100vh; 
+    padding: 20px;
+    background-color: #f5f5f5;
+    text-align: center;
+}
+
+/* Image Container */
+.image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-grow: 1;
+}
+
+.center-image {
+    max-width: 100%; 
+    height: auto;
+    max-height: 450px; 
+}
+
+/* Welcome Message Styling */
+.welcome-box {
+    flex-grow: 1; 
+    margin-bottom: 20px;
+}
+
+.welcome-box h1 {
+    font-size: 1.5em;
+    color: #333;
+    margin: 0;
+}
+
+/* Button Container */
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px; 
+    margin-bottom: 40px;
+    flex-grow: 0;
+}
+
+/* Button Styling */
+.custom-button {
+    background-color: #aa18ea; 
+    color:white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 110px;
+}
+
+.custom-button:hover {
+    background-color: #900ec4; /* Darker shade on hover */
+}
+
+@media (max-width: 600px) {
+    .welcome-box h1 {
+        font-size: 2em;
+    }
+
+    .custom-button {
+        font-size: 1em;
+        padding: 8px 16px;
+    }
+
+    .center-image {
+        max-height: 200px;
+    }
+}

@@ -1,0 +1,161 @@
+/* Main Container */
+.issue-page-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  font-family: "Roboto", sans-serif;
+  background-color: #dcd7d7;
+}
+
+/* Content */
+.content {
+  margin-left: 310px;
+  padding: 20px;
+  width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+/* Header */
+.header {
+  background-color: #466fb1;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Form Container */
+.issue-form-container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Styling */
+.issue-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 5px;
+  display: block;
+  font-weight: bold;
+}
+
+.required {
+  color: red;
+  margin-left: 5px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.form-input:focus {
+  border-color: #aa18ea;
+}
+
+/* Button Styling */
+.button-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.submit-button {
+  background-color: #aa18ea;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+  background-color: #900ec4;
+}
+
+/* Success and Error Messages */
+.success-message,
+.error-message {
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.success-message {
+  color: green;
+}
+
+.error-message {
+  color: red;
+}
+
+/* Scrollable List */
+.scrollable-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 10px;
+}
+
+.issue-list {
+  list-style: none;
+  padding: 0;
+}
+
+.issue-item {
+  padding: 10px;
+  background-color: #f9f9f9;
+  margin-bottom: 5px;
+  border-radius: 5px;
+}
+
+/* Scrollbar Styling */
+.scrollable-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollable-list::-webkit-scrollbar-thumb {
+  background-color: #aa18ea;
+  border-radius: 4px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .content {
+    margin-left: 0;
+  }
+
+  .header h2 {
+    font-size: 20px;
+  }
+
+  .submit-button {
+    width: 100%;
+    justify-content: center;
+  }
+}

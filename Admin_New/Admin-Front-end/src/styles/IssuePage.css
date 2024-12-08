@@ -1,0 +1,132 @@
+.issue-page-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  font-family: "Roboto", sans-serif;
+  background-color: #f9f9f9;
+}
+
+.content {
+  flex-grow: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.header {
+  background-color: #466fb1;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.issue-form-container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.issue-form {
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.button-container {
+  text-align: right;
+}
+
+.submit-button {
+  background-color: #aa18ea;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.submit-button:hover {
+  background-color: #900ec4;
+}
+
+.scrollable-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 10px;
+}
+
+.issue-list {
+  list-style: none;
+  padding: 0;
+}
+
+.issue-item {
+  padding: 10px;
+  background-color: #f9f9f9;
+  margin-bottom: 5px;
+  border-radius: 5px;
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+}
+
+.delete-button {
+  background-color: transparent;
+  border: none;
+  color: #d33;
+  cursor: pointer;
+  margin-left: 10px;
+  font-size: 16px;
+}
+
+.delete-button:hover {
+  color: #ff5555;
+}
+
+.button-container-new{
+  display: flex;
+  justify-content: space-between;
+}
+
+@media (max-width: 768px) {
+  .header h1 {
+    font-size: 20px;
+  }
+
+  .submit-button {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+
+  .scrollable-list {
+    max-height: 200px;
+  }
+}

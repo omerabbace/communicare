@@ -1,0 +1,167 @@
+/* General Styling */
+html,
+body {
+  overflow-x: hidden; /* Disable horizontal scrolling */
+  margin: 0;
+  padding: 0;
+  width: 100%;
+
+}
+
+.normal-users-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow-x: hidden;
+  background-color: #dcd7d7; /* Light background color for the entire screen */
+}
+
+.content {
+  margin-left: 310px; /* Adjust based on your sidebar width */
+  padding: 20px;
+  width: 100%;
+  background-color: #dcd7d7; /* Same light background as the main container */
+  min-height: 100vh;
+  position: relative;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+/* Sticky Header */
+.header {
+  /* position: sticky; */
+  top: 0;
+  background-color: #466FB1 ; /* Dark theme for the header */
+  z-index: 100;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px; /* Rounded edges for the header */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h2 {
+  font-size: 24px;
+  font-weight: bold;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  color: #ffffff;
+}
+
+.header-button {
+  background-color: #092579;
+  color: #ffffff;
+  padding: 10px 20px;
+  font-size: 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.header-button:hover {
+   background-color: #0056b3;
+}
+
+/* Search and Toggle Section */
+.search-container {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-input {
+  padding: 10px;
+  width: 100%;
+  max-width: 300px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for the input */
+}
+
+/* Table Styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #dcd7d7; /* White background for the table */
+  border-radius: 8px; /* Rounded edges for the table */
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for the table */
+}
+
+table th {
+  background-color: #1e1e2f; /* Dark theme for the table header */
+  color: #ffffff;
+  text-align: left;
+  padding: 12px;
+  font-size: 16px;
+  border-bottom: 2px solid #dddddd;
+}
+
+table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #dcd7d7; /* Light gray borders between rows */
+  color: #333333;
+}
+
+table tr:nth-child(even) {
+  background-color: #f9f9f9; /* Light gray background for alternate rows */
+}
+
+table tr:hover {
+  background-color: #f1f1f1; /* Slightly darker gray on hover */
+  cursor: pointer;
+}
+
+.table-container {
+  margin-top: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Toggle Styling */
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #132494;;
+}
+
+.toggle-container .toggle-label {
+  color: #333333;
+  font-weight: bold;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .content {
+    margin-left: 0;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .search-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  /* .header-button {
+    align-self: flex-end;
+  } */
+  
+ 
+}

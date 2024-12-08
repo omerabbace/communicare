@@ -1,0 +1,56 @@
+/* General Layout Container */
+.layout-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+    margin: 0; /* Remove extra margin */
+  }
+  
+  /* Sidebar is already styled in Sidebar.css */
+  
+  /* Main Content */
+  .main-content {
+     /* margin-left: 240px;   */
+    flex-grow: 1; 
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    /* overflow-y: auto; */
+    background-color: #f8f9fa;
+  }
+  
+  /* Header Styling */
+  .layout-header {
+    width: 100%; /* Make the header span the full width */
+    background-color: #1e1e2f; /* Match sidebar color */
+    color: #ffffff;
+    padding: 0px; /* Adjust header size */
+    text-align: center;
+    position: sticky;
+    top: 0;
+    border-radius: 15px; /* Rounded all corners */
+    margin-right: 750px;
+    z-index: 1000; /* Ensure it stays on top */
+    box-sizing: border-box; /* Include padding in width calculation */
+  }
+  
+  
+  
+  /* Content Area */
+  .content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  
+  /* Footer Styling */
+  .layout-footer {
+    /* background-color: #1e1e2f;  */
+    color: #000000;
+    text-align: center;
+    padding: 5px; /* Increase footer size */
+    bottom: 0;
+    font-size: small;
+  }
+  

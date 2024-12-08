@@ -1,0 +1,103 @@
+.issue-details-modal {
+  width: 80%;
+  max-width: 900px;
+  margin: 0 auto;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  max-height: 90vh; /* Modal height is limited to 90% of the viewport height */
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.modal-content {
+  flex-grow: 1;
+  overflow-y: auto; /* Enable vertical scrolling */
+  padding-right: 15px; /* Add padding to prevent content from touching scrollbar */
+  margin-right: -15px; /* Align the padding */
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 8px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.form-group textarea {
+  resize: vertical;
+  height: 100px;
+}
+
+.media-item {
+  margin-bottom: 10px;
+}
+
+.form-actions {
+  text-align: right;
+  margin-top: 20px;
+}
+
+.form-actions button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.form-actions button:hover {
+  background-color: #0056b3;
+}
+
+#assignTask{
+    color: white;
+    background-color: #aa18ea;
+    width: 110px;
+    margin: 5px;
+}
+#cancel {
+    color: white;
+    background-color: rgb(255, 58, 58);
+    width: 110px;
+    margin: 5px;
+
+
+}
+#assignTask:hover{
+    background-color: #8315b1;
+
+}
+#cancel:hover{
+    background-color: red;
+
+}

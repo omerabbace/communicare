@@ -35,3 +35,39 @@ exports.getCategories = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch categories' });
   }
 };
+
+// Controller to delete an issue category
+exports.deleteCategory = async (req, res) => {
+  const { categoryLabel } = req.body;
+
+  if (!categoryLabel) {
+    return res.status(400).json({ error: 'Category label is required' });
+  }
+
+  try {
+    const categoriesRef = db.ref('issueCategories');
+    categoriesRef.once('value', (snapshot) => {
+      const categories = snapshot.val();
+      const categoryKey = Object.keys(categories || {}).find(
+        (key) => categories[key].label === categoryLabel
+      );
+
+      if (!categoryKey) {
+        return res.status(404).json({ error: 'Category not found' });
+      }
+
+      // Remove the category
+      db.ref(`issueCategories/${categoryKey}`).remove()
+        .then(() => {
+          res.status(200).json({ success: true, message: 'Category deleted successfully' });
+        })
+        .catch((error) => {
+          console.error('Error deleting category:', error);
+          res.status(500).json({ error: 'Failed to delete category' });
+        });
+    });
+  } catch (error) {
+    console.error('Error deleting category:', error);
+    res.status(500).json({ error: 'Failed to delete category' });
+  }
+};
