@@ -1,0 +1,168 @@
+.dashboard-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  background-color: #f4f4f4;
+}
+
+.content {
+  margin-left: 310px; /* Adjust based on your sidebar width */
+  padding: 20px;
+  width: 100%;
+  overflow-y: auto;
+}
+
+.header {
+  background-color: #466fb1;
+  color: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Dashboard Section */
+.dashboard-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Counter Cards */
+.counter-card {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  justify-content: space-between;
+}
+
+.counter-group {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.counter-content h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.counter-content p {
+  margin: 5px 0 0;
+  color: #666;
+}
+
+/* Circular Progress Chart */
+.circle-chart {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--chart-color, #00bfff) calc(var(--percentage, 50) * 1%),
+    #ddd calc(var(--percentage, 50) * 1%)
+  );
+}
+
+.circle-chart::after {
+  content: "";
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background-color: white;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.circle-chart.blue {
+  --chart-color: #00bfff;
+}
+
+.circle-chart.orange {
+  --chart-color: #ffa500;
+}
+
+.circle-chart.purple {
+  --chart-color: #9b59b6;
+}
+
+.dashboard-stats {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  border-radius: 8px;
+  flex: 1;
+  text-align: center;
+}
+
+.stat-card h3 {
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.stat-card h2 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #466fb1;
+}
+
+.dashboard-charts {
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  height: 400px;
+}
+
+.chart-container-dashboard {
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  border-radius: 8px;
+  width: 100%;
+  height: 400px;
+}
+
+.scrollable-payments {
+  max-height: 200px; /* Adjust as needed */
+  overflow-y: auto; /* Enable vertical scrolling */
+}
+
+
+.dashboard-charts ul {  /* Style the payment list */
+  list-style: none;
+  padding: 0;
+}
+
+.dashboard-charts li {
+  border-bottom: 1px solid #eee;
+  padding: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .counter-group {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

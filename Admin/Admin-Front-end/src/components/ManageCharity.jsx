@@ -1,29 +1,29 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import Sidebar from './Sidebar';
-import { BASE_URL } from '../config';
-import '../styles/ManageProfile.css'; // Assuming consistent design
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import Sidebar from "./Sidebar";
+import { BASE_URL } from "../config";
+import "../styles/ManageProfile.css";
 
 const CharityProjects = () => {
   const [projects, setProjects] = useState([]);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [editMode, setEditMode] = useState(null);
-  const [editedTitle, setEditedTitle] = useState('');
+  const [editedTitle, setEditedTitle] = useState("");
 
   // Fetch charity projects from the server
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const token = localStorage.getItem('token'); // Get the token from localStorage or state
+        const token = localStorage.getItem("token"); // Get the token from localStorage or state
         const response = await axios.get(`${BASE_URL}/api/charityProjects`, {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
         setProjects(response.data.data);
       } catch (err) {
-        setError('Failed to load charity projects. Please try again later.');
+        setError("Failed to load charity projects. Please try again later.");
       }
     };
 
@@ -33,33 +33,35 @@ const CharityProjects = () => {
   // Function to toggle the disable/enable status of a project
   const toggleProjectStatus = async (projectId) => {
     try {
-      const token = localStorage.getItem('token'); // Get the token from localStorage or state
+      const token = localStorage.getItem("token"); // Get the token from localStorage or state
       const response = await axios.patch(
         `${BASE_URL}/api/charityProjects/${projectId}/toggle-status`,
         {},
         {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
-      
+
       // Ensure that the response from the API confirms the state change
       if (response.status === 200) {
         setProjects((prevProjects) =>
           prevProjects.map((project) =>
-            project._id === projectId ? { ...project, disabled: !project.disabled } : project
+            project._id === projectId
+              ? { ...project, disabled: !project.disabled }
+              : project
           )
         );
-        setSuccess('Project status updated successfully.');
+        setSuccess("Project status updated successfully.");
       } else {
-        throw new Error('Failed to update status in the database.');
+        throw new Error("Failed to update status in the database.");
       }
     } catch (err) {
-      setError('Failed to update project status. Please try again.');
+      setError("Failed to update project status. Please try again.");
     }
   };
-  
+
   // Function to enable edit mode for a specific project
   const handleEditClick = (projectId, title) => {
     setEditMode(projectId);
@@ -69,29 +71,31 @@ const CharityProjects = () => {
   // Function to update the project title
   const updateProjectTitle = async (projectId) => {
     try {
-      const token = localStorage.getItem('token'); // Get the token from localStorage or state
+      const token = localStorage.getItem("token"); // Get the token from localStorage or state
       const response = await axios.patch(
         `${BASE_URL}/api/charityProjects/${projectId}/update-title`,
         { title: editedTitle },
         {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
       // Update the projects state after the successful API call
       setProjects((prevProjects) =>
         prevProjects.map((project) =>
-          project._id === projectId ? { ...project, title: editedTitle } : project
+          project._id === projectId
+            ? { ...project, title: editedTitle }
+            : project
         )
       );
 
       // Exit edit mode and show success message
       setEditMode(null);
-      setSuccess('Project title updated successfully.');
+      setSuccess("Project title updated successfully.");
     } catch (err) {
-      setError('Failed to update project title. Please try again.');
+      setError("Failed to update project title. Please try again.");
     }
   };
 
@@ -118,16 +122,16 @@ const CharityProjects = () => {
                       onChange={(e) => setEditedTitle(e.target.value)}
                       className="edit-input"
                     />
-                    <div className="button-group">
+                    <div className="button-group-new">
                       <button
                         onClick={() => updateProjectTitle(project._id)}
-                        className="custom-button save-button"
+                        className="save-button-new"
                       >
                         Save
                       </button>
                       <button
                         onClick={() => setEditMode(null)}
-                        className="custom-button cancel-button"
+                        className="cancel-button-new"
                       >
                         Cancel
                       </button>
@@ -135,20 +139,26 @@ const CharityProjects = () => {
                   </div>
                 ) : (
                   <div className="project-info">
-                    <h3>{project.title}</h3>
-                    <p>{project.description}</p>
-                    <div className="button-group">
+                    <div>
+                      <h3>{project.title}</h3>
+                      <p>{project.description}</p>
+                    </div>
+                    <div className="button-group-mcp">
                       <button
-                        onClick={() => handleEditClick(project._id, project.title)}
+                        onClick={() =>
+                          handleEditClick(project._id, project.title)
+                        }
                         className="custom-button edit-button"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => toggleProjectStatus(project._id)}
-                        className={`custom-button ${project.disabled ? 'enable-button' : 'disable-button'}`}
+                        className={`custom-button ${
+                          project.disabled ? "enable-button" : "disable-button"
+                        }`}
                       >
-                        {project.disabled ? 'Enable' : 'Disable'}
+                        {project.disabled ? "Enable" : "Disable"}
                       </button>
                     </div>
                   </div>

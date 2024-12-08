@@ -81,3 +81,32 @@ exports.completePayment = asyncHandler(async (req, res, next) => {
         data: paymentRecord,
     });
 });
+
+
+// Get All Service Payments (Modified)
+exports.getAllServicePayments = asyncHandler(async (req, res, next) => {
+    try {
+      const servicePayments = await ServicePayment.find()
+        .populate({
+          path: 'userId',
+          select: 'name' // Select only the name of the user
+        })
+        .populate({
+          path: 'serviceProviderId',
+          select: 'name' // Select only the name of the service provider
+        });
+
+      res.status(200).json({
+        status: 'success',
+        results: servicePayments.length,
+        data: servicePayments,
+      });
+    } catch (error) {
+        console.error("Error fetching service payments:", error); // Log the error for debugging
+        res.status(500).json({ // Improved error response (JSON format)
+          status: 'error',
+          message: 'Internal Server Error', // Generic error message for security
+          error: error.message // Detailed error for development/debugging
+        });
+    }
+});

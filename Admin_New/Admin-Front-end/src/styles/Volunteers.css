@@ -1,0 +1,111 @@
+/* General Layout */
+.volunteers-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow-x: hidden;
+  background-color: #dcd7d7; /* Matches the theme of the Normal Users screen */
+}
+
+.content {
+  margin-left: 310px; /* Sidebar width adjustment */
+  padding: 20px;
+  width: 100%;
+  background-color: #dcd7d7;
+  min-height: 100vh;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+/* Header Section */
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  background-color: #466fb1;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+}
+
+.header-container h2 {
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+  margin: 0;
+}
+
+.add-volunteer-btn {
+  background-color: #092579; /* Matches the Save button color */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.3s ease;
+}
+
+.add-volunteer-btn:hover {
+  background-color: #0056b3; /* Slightly darker on hover */
+}
+
+/* Search and Toggle Section */
+.search-container {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Toggle alignment and label styling */
+.toggle-container {
+  display: flex;
+  align-items: center; /* Align toggle and label vertically */
+  gap: 10px; /* Space between toggle and label */
+  background-color: #f4f4f4;
+}
+
+.toggle-label {
+  font-size: 14px;
+  font-weight: bold;
+  color: #466fb1; /* Primary blue color */
+  margin: 0;
+}
+
+/* Search input styling */
+.search-input {
+  padding: 8px;
+  width: 100%;
+  max-width: 300px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
+
+
+
+
+/* Responsive Fix */
+@media (max-width: 768px) {
+  .search-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .header-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .search-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}

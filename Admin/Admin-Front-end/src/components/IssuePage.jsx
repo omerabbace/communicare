@@ -1,62 +1,81 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { BASE_URL } from '../config';
-import Sidebar from './Sidebar'; // Import the Sidebar component
-import '../styles/ManageProfile.css'; // Use ManageProfile.css for consistent styling
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { BASE_URL } from "../config";
+import Sidebar from "./Sidebar"; // Import the Sidebar component
+import "../styles/ManageProfile.css"; // Use ManageProfile.css for consistent styling
 
 const IssuePage = () => {
-  const [categoryName, setCategoryName] = useState('');
+  const [categoryName, setCategoryName] = useState("");
   const [categories, setCategories] = useState([]);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [showCategories, setShowCategories] = useState(false); // Toggle state for categories visibility
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   // Fetch categories from Firebase
   useEffect(() => {
-    axios.get(`${BASE_URL}/api/issues/categories`)
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = () => {
+    axios
+      .get(`${BASE_URL}/api/issues/categories`)
       .then((response) => {
         setCategories(Object.values(response.data.categories || {}));
       })
       .catch((error) => {
-        console.error('Error fetching categories:', error);
+        console.error("Error fetching categories:", error);
       });
-  }, []);
+  };
 
   // Add new category to Firebase
   const handleAddCategory = (e) => {
     e.preventDefault();
-    setErrorMessage('');
-    setSuccessMessage('');
+    setErrorMessage("");
+    setSuccessMessage("");
 
     if (!categoryName.trim()) {
-      setErrorMessage('Category name cannot be empty.');
+      setErrorMessage("Category name cannot be empty.");
       return;
     }
 
-    axios.post(`${BASE_URL}/api/issues/addCategory`, { categoryName })
+    axios
+      .post(`${BASE_URL}/api/issues/addCategory`, { categoryName })
       .then((response) => {
-        console.log('Category added:', response.data);
-        setSuccessMessage('Category added successfully!');
-        setCategoryName('');
-        // Refetch categories after adding new one
-        axios.get(`${BASE_URL}/api/issues/categories`)
-          .then((response) => {
-            setCategories(Object.values(response.data.categories || {}));
-          });
+        console.log("Category added:", response.data);
+        setSuccessMessage("Category added successfully!");
+        setCategoryName("");
+        fetchCategories();
       })
       .catch((error) => {
-        console.error('Error adding category:', error);
-        setErrorMessage('Failed to add category. Please try again.');
+        console.error("Error adding category:", error);
+        setErrorMessage("Failed to add category. Please try again.");
       });
   };
 
-  // Toggle category visibility
-  const toggleCategories = () => {
-    setShowCategories((prev) => !prev);
+  // Delete category from Firebase
+  const handleDeleteCategory = (categoryLabel) => {
+    if (!window.confirm(`Are you sure you want to delete "${categoryLabel}"?`))
+      return;
+
+    axios
+      .delete(`${BASE_URL}/api/issues/deleteCategory`, {
+        data: { categoryLabel },
+      })
+      .then(() => {
+        setSuccessMessage(`Category "${categoryLabel}" deleted successfully.`);
+        fetchCategories();
+      })
+      .catch((error) => {
+        console.error("Error deleting category:", error);
+        setErrorMessage(
+          `Failed to delete category "${categoryLabel}". Please try again.`
+        );
+      });
   };
 
   return (
-    <div className="manage-profile-container"> {/* Main container for sidebar and content */}
+    <div className="manage-profile-container">
+      {" "}
+      {/* Main container for sidebar and content */}
       <Sidebar /> {/* Sidebar component */}
       <div className="main-content">
         <header className="header">
@@ -74,33 +93,39 @@ const IssuePage = () => {
                 required
               />
             </div>
-            
-            <button type="submit" className="custom-button form-button">Add Category</button>
-            
-            {successMessage && <p className="success-message">{successMessage}</p>}
+            <div className="button-container">
+              <button type="submit" className="custom-button-mp form-button">
+                Add Category
+              </button>
+            </div>
+
+            {successMessage && (
+              <p className="success-message">{successMessage}</p>
+            )}
             {errorMessage && <p className="error-message">{errorMessage}</p>}
           </form>
 
-          {/* Button to show/hide categories */}
-          <button onClick={toggleCategories} className="custom-button form-button">
-            {showCategories ? 'Hide Categories' : 'Show Categories'}
-          </button>
-
-          {showCategories && (
-            <>
-              <h2 className="issue-subtitle">Categories:</h2>
-              {/* Scrollable list of categories */}
-              <div className="scrollable-list">
-                <ul className="issue-list">
-                  {categories.map((category, index) => (
-                    <li key={index} className="issue-item">
-                      {category.label}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </>
-          )}
+          {/* Categories are displayed by default */}
+          <h2 className="issue-subtitle">Categories:</h2>
+          <div className="scrollable-list">
+            <ul className="issue-list">
+              {categories.length > 0 ? (
+                categories.map((category, index) => (
+                  <li key={index} className="issue-item">
+                    {category.label}
+                    <button
+                      onClick={() => handleDeleteCategory(category.label)}
+                      className="delete-button"
+                    >
+                      Delete
+                    </button>
+                  </li>
+                ))
+              ) : (
+                <p>No categories available.</p>
+              )}
+            </ul>
+          </div>
         </div>
       </div>
     </div>

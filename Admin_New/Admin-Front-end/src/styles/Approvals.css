@@ -1,0 +1,26 @@
+.approval-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+}
+
+.content {
+    margin-left: 310px; /* Adjust based on your sidebar width */
+    padding: 20px;
+    width: 100%;
+    background-color: #f4f4f4; /* Optional: background for content area */
+    min-height: 100vh; /* Ensures content area covers full height */
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header-container h2 {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
+}

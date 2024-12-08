@@ -1,5 +1,5 @@
 const express = require('express');
-const { addCategory, getCategories } = require('../controllers/issueController');
+const { addCategory, getCategories, deleteCategory } = require('../controllers/issueController');
 
 const router = express.Router();
 
@@ -8,5 +8,8 @@ router.post('/addCategory', addCategory);
 
 // Route to get all categories
 router.get('/categories', getCategories);
+
+// Route to delete a category
+router.delete('/deleteCategory', deleteCategory);
 
 module.exports = router;
