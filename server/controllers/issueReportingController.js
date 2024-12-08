@@ -1364,7 +1364,7 @@ exports.getVolunteerLeaderStats = asyncHandler(async (req, res) => {
     // Count the number of pending tasks where the volunteer is the leader
     const pendingTasksCount = await Issue.countDocuments({
       leader: volunteerId,
-      status: "pending",
+      status: "in progress",
     });
 
     // Count the number of subtasks assigned to the volunteer
