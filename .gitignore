@@ -30,9 +30,8 @@ node_modules/
 .expo-shared/
 
 # Ignore uploads
-.uploads/
-.profile-pictures/
-.keys/
-.env
-.google-services.json
-.firebaseConfig.js
+server/.uploads/
+.server/keys/
+server/.env
+front-end/.google-services.json
+front-end/.firebaseConfig.js
