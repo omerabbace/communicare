@@ -137,6 +137,126 @@
 
 // export default ServiceProviders;
 
+// import React, { useState, useEffect } from 'react';
+// import Sidebar from '../components/Sidebar';
+// import { BASE_URL } from '../config';
+// import axios from 'axios';
+// import { useNavigate } from 'react-router-dom';
+// import { Modal } from '@mui/material';
+// import EditServiceProviderForm from '../components/EditServiceProvider';
+// import ToggleSwitch from '../components/ToggleSwitch';
+// import UserTable from '../components/UserTable';
+// import '../styles/ServiceProviders.css';
+// import { FaPlus, FaSearch } from 'react-icons/fa'; // Icons
+
+// const ServiceProviders = () => {
+//   const [serviceProviders, setServiceProviders] = useState([]);
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+//   const [showActiveUsers, setShowActiveUsers] = useState(true);
+//   const [selectedServiceProvider, setSelectedServiceProvider] = useState(null);
+//   const navigate = useNavigate();
+
+//   useEffect(() => {
+//     const fetchServiceProviders = async () => {
+//       try {
+//         const token = localStorage.getItem('token');
+//         const response = await axios.get(`${BASE_URL}/api/user/getAllServiceProviders`, {
+//           headers: { Authorization: `Bearer ${token}` },
+//         });
+//         setServiceProviders(response.data.data);
+//       } catch (error) {
+//         console.error('Error fetching service providers:', error);
+//       }
+//     };
+
+//     fetchServiceProviders();
+//   }, []);
+
+//   const handleEdit = (id) => {
+//     const providerToEdit = serviceProviders.find((provider) => provider._id === id);
+//     setSelectedServiceProvider(providerToEdit);
+//     setIsModalOpen(true);
+//   };
+
+//   const handleCloseModal = () => {
+//     setIsModalOpen(false);
+//     setSelectedServiceProvider(null);
+//   };
+
+//   const handleDelete = async (id) => {
+//     try {
+//       const token = localStorage.getItem('token');
+//       const response = await axios.patch(
+//         `${BASE_URL}/api/users/disable/${id}`,
+//         {},
+//         { headers: { Authorization: `Bearer ${token}` } }
+//       );
+
+//       if (response.data.success) {
+//         setServiceProviders((prevUsers) =>
+//           prevUsers.map((user) =>
+//             user._id === id ? { ...user, isActive: false } : user
+//           )
+//         );
+//       } else {
+//         console.error('Failed to disable the user');
+//       }
+//     } catch (err) {
+//       console.error('Error disabling user:', err);
+//     }
+//   };
+
+//   const handleAddServiceProvider = () => {
+//     navigate('/serviceproviderForm');
+//   };
+
+//   const handleToggle = () => {
+//     setShowActiveUsers(!showActiveUsers);
+//   };
+
+//   const filteredServiceProviders = serviceProviders.filter((provider) =>
+//     showActiveUsers ? provider.isActive : !provider.isActive
+//   );
+
+//   return (
+//     <div className="service-providers-container">
+//       <Sidebar />
+//       <div className="content">
+//         <div className="header">
+//           <h2>Service Providers</h2>
+//           <button className="add-button" onClick={handleAddServiceProvider}>
+//             <FaPlus style={{ marginRight: '5px' }} /> Add Service Provider
+//           </button>
+//         </div>
+
+//         <div className="filter-container">
+//           <div className="search-wrapper">
+//             <input
+//               type="text"
+//               className="search-input"
+//               placeholder="Search service provider..."
+//             />
+//             {/* <FaSearch className="search-icon" /> */}
+//           </div>
+//           <ToggleSwitch isActive={showActiveUsers} handleToggle={handleToggle} />
+//         </div>
+
+//         <UserTable rows={filteredServiceProviders} onEdit={handleEdit} onDelete={handleDelete} />
+
+//         <Modal open={isModalOpen} onClose={handleCloseModal}>
+//           <div className="modal-content">
+//             {selectedServiceProvider && (
+//               <EditServiceProviderForm user={selectedServiceProvider} onClose={handleCloseModal} />
+//             )}
+//           </div>
+//         </Modal>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default ServiceProviders;
+
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import { BASE_URL } from '../config';
@@ -154,6 +274,7 @@ const ServiceProviders = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showActiveUsers, setShowActiveUsers] = useState(true);
   const [selectedServiceProvider, setSelectedServiceProvider] = useState(null);
+  const [searchQuery, setSearchQuery] = useState(''); // NEW STATE FOR SEARCH INPUT
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -214,9 +335,22 @@ const ServiceProviders = () => {
     setShowActiveUsers(!showActiveUsers);
   };
 
-  const filteredServiceProviders = serviceProviders.filter((provider) =>
-    showActiveUsers ? provider.isActive : !provider.isActive
-  );
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value.toLowerCase()); // UPDATE SEARCH QUERY STATE
+  };
+
+  const filteredServiceProviders = serviceProviders
+    .filter((provider) => {
+      if (showActiveUsers) return provider.isActive;
+      return !provider.isActive;
+    })
+    .filter((provider) => {
+      const { name, email } = provider;
+      return (
+        name.toLowerCase().includes(searchQuery) ||
+        email.toLowerCase().includes(searchQuery)
+      );
+    });
 
   return (
     <div className="service-providers-container">
@@ -235,13 +369,23 @@ const ServiceProviders = () => {
               type="text"
               className="search-input"
               placeholder="Search service provider..."
+              value={searchQuery}
+              onChange={handleSearchChange}
             />
-            <FaSearch className="search-icon" />
+            {/* <FaSearch className="search-icon" /> */}
           </div>
           <ToggleSwitch isActive={showActiveUsers} handleToggle={handleToggle} />
         </div>
 
-        <UserTable rows={filteredServiceProviders} onEdit={handleEdit} onDelete={handleDelete} />
+        <UserTable
+          rows={filteredServiceProviders}
+          onEdit={
+            showActiveUsers ? null : (id) => handleEdit(id) // HIDE EDIT FOR ACTIVE USERS
+          }
+          onDelete={
+            showActiveUsers ? null : (id) => handleDelete(id) // HIDE DELETE FOR ACTIVE USERS
+          }
+        />
 
         <Modal open={isModalOpen} onClose={handleCloseModal}>
           <div className="modal-content">

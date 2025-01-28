@@ -6,7 +6,7 @@ const ToggleSwitch = ({ isActive, handleToggle }) => {
     <label className="switch">
       <input type="checkbox" checked={isActive} onChange={handleToggle} />
       <span className="slider round"></span>
-      <span className="toggle-label">{isActive ? 'Active' : 'Inactive'}</span>
+      <span className="toggle-label">{isActive ? 'Active' : ''}</span>
     </label>
   );
 };

@@ -70,7 +70,7 @@ const UserTable = ({ rows, onEdit, onDelete }) => {
       width: columnWidths.actions,
       headerAlign: 'center', align: 'center',
       renderCell: (params) => (
-        <ActionMenu id={params.row._id} onEdit={onEdit} onDelete={onDelete} />
+        <ActionMenu id={params.row._id}  isActive={params.row.isActive} onEdit={onEdit} onDelete={onDelete} />
       )
     }
   ];
@@ -118,7 +118,7 @@ const UserTable = ({ rows, onEdit, onDelete }) => {
   );
 };
 
-const ActionMenu = ({ id, onEdit, onDelete }) => {
+const ActionMenu = ({ id,isActive, onEdit, onDelete }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handleClick = (event) => {
@@ -130,15 +130,30 @@ const ActionMenu = ({ id, onEdit, onDelete }) => {
   };
 
   return (
+    // <>
+    //   <IconButton onClick={handleClick}>
+    //     <MoreVertIcon />
+    //   </IconButton>
+    //   <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
+    //     <MenuItem onClick={() => { onEdit(id); handleClose(); }}>Edit</MenuItem>
+    //     <MenuItem onClick={() => { onDelete(id); handleClose(); }}>Delete</MenuItem>
+    //   </Menu>
+    // </>
     <>
+    {isActive ? (
       <IconButton onClick={handleClick}>
         <MoreVertIcon />
       </IconButton>
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
-        <MenuItem onClick={() => { onEdit(id); handleClose(); }}>Edit</MenuItem>
-        <MenuItem onClick={() => { onDelete(id); handleClose(); }}>Delete</MenuItem>
-      </Menu>
-    </>
+    ) : null}
+    <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
+      {isActive ? (
+        <>
+          <MenuItem onClick={() => { onEdit(id); handleClose(); }}>Edit</MenuItem>
+          <MenuItem onClick={() => { onDelete(id); handleClose(); }}>Delete</MenuItem>
+        </>
+      ) : null}
+    </Menu>
+  </>
   );
 };
 

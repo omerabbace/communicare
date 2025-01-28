@@ -512,7 +512,7 @@ const Login = ({ navigation }) => {
       }
     } else {
       showErrorAlert("Login failed. Please try again.");
-    }
+    } 
   };
   
 
